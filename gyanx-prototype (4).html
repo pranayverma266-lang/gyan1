@@ -1,0 +1,1322 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GyanX</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#000000; --panel:#0d0f0e; --panel2:#161918; --border:#252928;
+  --text:#f3f6f4; --muted:#8ba69c; --accent:#22d3a5; --accent2:#0ea5e9;
+  --amber:#ffb020; --pink:#ff5da2; --violet:#a78bfa;
+  --red:#ff6b6b; --yellow:#ffc23c; --green:#2ee69b;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+:root:not([data-theme="light"]){}
+html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%;}
+*{box-sizing:border-box;}
+body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:'Inter',-apple-system,Segoe UI,Roboto,sans-serif;}
+h1,h2,h3{font-family:'Sora',sans-serif;letter-spacing:-0.01em;}
+
+/* ---- Auth screen ---- */
+.auth-wrap{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:24px;max-width:400px;margin:0 auto;}
+.auth-logo{font-size:1.6rem;font-weight:800;margin-bottom:4px;background:linear-gradient(135deg,var(--accent),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent;}
+.auth-sub{color:var(--muted);font-size:0.88rem;margin-bottom:28px;}
+.field{margin-bottom:12px;}
+.field label{display:block;font-size:0.78rem;color:var(--muted);margin-bottom:5px;}
+.field input{width:100%;background:var(--panel2);border:1px solid var(--border);color:var(--text);border-radius:9px;padding:11px 12px;font-size:0.92rem;font-family:inherit;}
+.field input:focus{outline:2px solid var(--accent);outline-offset:1px;}
+.auth-toggle{text-align:center;margin-top:16px;font-size:0.85rem;color:var(--muted);}
+.auth-toggle a{color:var(--accent);text-decoration:none;font-weight:600;}
+.auth-err{color:var(--red);font-size:0.8rem;margin:-4px 0 10px;}
+.role-toggle{display:flex;gap:8px;margin-bottom:18px;}
+.role-toggle button{flex:1;background:var(--panel2);border:1px solid var(--border);color:var(--muted);border-radius:9px;padding:9px;font-size:0.82rem;font-weight:600;}
+.role-toggle button.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+.picker-label{font-size:0.7rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:12px 0 6px;}
+.level-row{display:flex;gap:8px;flex-wrap:wrap;}
+.level-row button{background:var(--panel2);border:1px solid var(--border);color:var(--muted);border-radius:20px;padding:8px 14px;font-size:0.82rem;font-weight:600;font-family:inherit;}
+.level-row button.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+.subject-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;}
+.subject-grid button{background:var(--panel2);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:12px 8px;font-size:0.8rem;font-weight:600;font-family:inherit;text-align:center;}
+.subject-grid button.active{background:rgba(34,211,165,.15);border-color:var(--accent);color:var(--accent);}
+.timer-card{display:flex;align-items:center;justify-content:space-between;background:var(--panel2);}
+
+/* ---- App shell ---- */
+.app{display:flex;min-height:100vh;}
+.sidebar{width:220px;flex:0 0 auto;background:var(--panel);border-right:1px solid var(--border);padding:18px 12px;padding-top:calc(18px + env(safe-area-inset-top,0px));display:flex;flex-direction:column;}
+.sidebar h1{font-size:1.15rem;margin:0 8px 22px;background:linear-gradient(135deg,var(--accent),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent;}
+.sidebar button{display:block;width:100%;text-align:left;background:transparent;border:none;color:var(--muted);padding:9px 10px;border-radius:8px;font-size:0.84rem;margin-bottom:2px;font-family:inherit;}
+.sidebar button.active{background:var(--panel2);color:var(--text);font-weight:600;box-shadow:inset 2px 0 0 var(--accent);}
+.sidebar .grp{font-size:0.68rem;text-transform:uppercase;letter-spacing:.06em;color:#5a606f;margin:14px 8px 6px;}
+.sidebar .userbox{margin-top:auto;border-top:1px solid var(--border);padding-top:12px;display:flex;align-items:center;gap:9px;}
+.avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent2),var(--pink));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;color:#fff;flex:0 0 auto;}
+.userbox .uname{font-size:0.82rem;font-weight:600;}
+.userbox .urole{font-size:0.7rem;color:var(--muted);}
+.logout{margin-left:auto;background:none;border:none;color:var(--muted);font-size:0.75rem;cursor:pointer;padding:4px;width:auto !important;}
+
+.topbar{display:none;position:sticky;top:0;padding-top:env(safe-area-inset-top,0px);background:var(--panel);border-bottom:1px solid var(--border);z-index:10;align-items:center;justify-content:space-between;padding-left:14px;padding-right:14px;}
+.topbar h1{font-size:1.05rem;margin:12px 0;background:linear-gradient(135deg,var(--accent),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent;}
+
+.content{flex:1;min-width:0;}
+main{padding:20px 24px 90px;max-width:760px;margin:0 auto;}
+
+:root[data-theme="light"]{
+  --bg:#f5f8f6; --panel:#ffffff; --panel2:#eef5f1; --border:#dceae3;
+  --text:#122019; --muted:#5c6f67; --accent:#17b892; --accent2:#0e8f72;
+  --red:#d84a4a; --yellow:#b9820a; --green:#1f9c6f;
+}
+:root[data-theme="light"] .auth-logo,:root[data-theme="light"] .sidebar h1,:root[data-theme="light"] .topbar h1,:root[data-theme="light"] .drawer h1{-webkit-text-fill-color:initial;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent;}
+:root[data-theme="light"] .lesson{background:#e9f7f1;border-color:#bfe6d7;}
+:root[data-theme="light"] .lesson h3{color:var(--accent2);}
+:root[data-theme="light"] body{background:var(--bg);}
+.switchrow{display:flex;align-items:center;justify-content:space-between;padding:9px 10px;margin-bottom:2px;}
+.switchrow span{font-size:0.82rem;color:var(--muted);}
+.toggle{position:relative;width:42px;height:23px;background:var(--panel2);border:1px solid var(--border);border-radius:20px;flex:0 0 auto;font-family:inherit;}
+.toggle .knob{position:absolute;top:2px;left:2px;width:17px;height:17px;border-radius:50%;background:var(--accent);transition:left .15s ease;}
+.toggle.on .knob{left:21px;}
+.langbtn{background:var(--panel2);border:1px solid var(--border);color:var(--text);border-radius:14px;padding:5px 10px;font-size:0.72rem;font-weight:700;font-family:inherit;}
+.menubtn{background:var(--panel2);border:1px solid var(--border);color:var(--text);border-radius:8px;width:36px;height:36px;font-size:1rem;font-family:inherit;}
+.drawer-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:20;}
+.drawer-backdrop.open{display:block;}
+.drawer{position:fixed;top:0;left:0;bottom:0;width:78%;max-width:300px;background:var(--panel);border-right:1px solid var(--border);z-index:21;padding:16px 12px;padding-top:calc(16px + env(safe-area-inset-top,0px));transform:translateX(-100%);transition:transform .22s ease;overflow-y:auto;}
+.drawer.open{transform:translateX(0);}
+.drawer .dclose{float:right;background:none;border:none;color:var(--muted);font-size:1.1rem;width:auto;padding:4px 8px;}
+.drawer h1{font-size:1.1rem;margin:0 0 16px;background:linear-gradient(135deg,var(--accent),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent;}
+.drawer button{display:block;width:100%;text-align:left;background:transparent;border:none;color:var(--muted);padding:11px 10px;border-radius:8px;font-size:0.88rem;margin-bottom:2px;font-family:inherit;}
+.drawer button.active{background:var(--panel2);color:var(--text);font-weight:600;box-shadow:inset 2px 0 0 var(--accent);}
+.drawer .grp{font-size:0.68rem;text-transform:uppercase;letter-spacing:.06em;color:#5a606f;margin:14px 8px 6px;}
+
+@media (max-width: 760px){
+  .sidebar{display:none;}
+  .topbar{display:flex;}
+  main{padding:16px 14px 30px;}
+}
+
+.card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:14px;}
+.card h2{margin:0 0 10px;font-size:1rem;}
+.q{margin-bottom:16px;}
+.q p{margin:0 0 8px;font-weight:600;font-size:0.92rem;}
+.opt{display:block;width:100%;text-align:left;background:var(--panel2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:10px 12px;margin-bottom:6px;font-size:0.88rem;font-family:inherit;}
+.opt.selected{border-color:var(--accent);background:#1c3630;}
+.opt.correctAns{border-color:var(--green);}
+.opt.wrongAns{border-color:var(--red);}
+.btn{background:var(--accent);color:#fff;border:none;border-radius:9px;padding:11px 16px;font-size:0.9rem;font-weight:600;width:100%;margin-top:6px;font-family:inherit;box-shadow:0 3px 10px rgba(23,184,146,.25);transition:transform .12s ease;}
+.btn:active{transform:scale(.98);}
+.btn.secondary{background:var(--panel2);border:1px solid var(--border);color:var(--text);box-shadow:none;}
+.muted{color:var(--muted);font-size:0.8rem;}
+.badge{display:inline-block;padding:2px 9px;border-radius:12px;font-size:0.72rem;font-weight:700;margin-left:6px;}
+.badge.red{background:rgba(239,106,106,.15);color:var(--red);}
+.badge.yellow{background:rgba(224,168,62,.15);color:var(--yellow);}
+.badge.green{background:rgba(63,191,143,.15);color:var(--green);}
+.node{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--border);border-radius:9px;margin-bottom:8px;background:var(--panel2);}
+.dot{width:13px;height:13px;border-radius:50%;flex:0 0 auto;}
+.dot.red{background:var(--red);} .dot.yellow{background:var(--yellow);} .dot.green{background:var(--green);}
+.arrow{color:var(--muted);font-size:0.75rem;margin:0 0 8px 20px;}
+table{width:100%;border-collapse:collapse;font-size:0.82rem;}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--border);}
+th{color:var(--muted);font-weight:600;font-size:0.72rem;}
+.pill{display:inline-block;background:var(--panel2);border:1px solid var(--border);border-radius:14px;padding:3px 9px;font-size:0.72rem;margin:2px 3px 0 0;}
+.lesson{background:#132420;border:1px solid #2b463d;border-radius:9px;padding:12px;margin-bottom:10px;}
+.lesson h3{margin:0 0 6px;font-size:0.9rem;color:#6fe0bd;}
+.empty{text-align:center;color:var(--muted);padding:30px 10px;font-size:0.85rem;}
+textarea{width:100%;min-height:90px;background:var(--panel2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:10px;font-size:0.85rem;font-family:inherit;}
+.trophy{font-size:1.5rem;}
+.streak{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;}
+.day{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:0.65rem;background:var(--panel2);border:1px solid var(--border);}
+.day.due{background:rgba(224,168,62,.18);border-color:var(--yellow);color:var(--yellow);}
+.insight-card{background:linear-gradient(160deg,#132420,var(--panel));border:1px solid var(--accent2);}
+:root[data-theme="light"] .insight-card{background:linear-gradient(160deg,#e9f7f1,var(--panel));}
+.insight-tag{display:inline-block;background:var(--accent);color:#fff;font-size:0.68rem;font-weight:800;letter-spacing:.05em;padding:3px 9px;border-radius:6px;margin-bottom:8px;}
+.insight-row{padding:8px 0;border-bottom:1px solid var(--border);font-size:0.85rem;}
+.insight-row:last-of-type{border-bottom:none;}
+.backbtn{background:none;border:none;color:var(--muted);font-size:0.82rem;font-weight:600;padding:0 0 14px;font-family:inherit;display:block;}
+.backbtn:hover{color:var(--accent);}
+
+body{background-image:radial-gradient(circle at 15% 0%, rgba(23,184,146,.10), transparent 45%), radial-gradient(circle at 100% 20%, rgba(240,168,62,.06), transparent 40%);background-attachment:fixed;}
+.card{box-shadow:0 2px 10px rgba(0,0,0,.18);position:relative;}
+:root[data-theme="light"] .card{box-shadow:0 2px 14px rgba(18,32,25,.06);}
+main{animation:fadein .25s ease;}
+@keyframes fadein{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+.onb-backdrop{position:fixed;inset:0;background:rgba(5,10,8,.72);backdrop-filter:blur(3px);z-index:30;display:flex;align-items:center;justify-content:center;padding:20px;animation:fadein .2s ease;}
+.onb-card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:28px 22px;max-width:340px;width:100%;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.4);}
+.onb-icon{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--amber));display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin:0 auto 16px;}
+.onb-card h2{margin:0 0 8px;font-size:1.15rem;}
+.onb-card p{margin:0 0 18px;}
+.onb-dots{display:flex;gap:6px;justify-content:center;margin-bottom:18px;}
+.dot2{width:7px;height:7px;border-radius:50%;background:var(--border);}
+.dot2.on{background:var(--accent);width:20px;border-radius:4px;transition:width .2s ease;}
+
+.loading-wrap{text-align:center;padding:50px 20px;}
+.spinner{width:44px;height:44px;border:4px solid var(--panel2);border-top-color:var(--accent);border-radius:50%;margin:0 auto 18px;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading-step{color:var(--muted);font-size:0.85rem;margin-top:4px;animation:fadein .3s ease;}
+.upload{border:2px dashed var(--border);border-radius:9px;padding:20px;text-align:center;color:var(--muted);font-size:0.82rem;}
+.stat-row{display:flex;gap:10px;}
+.hero{background:linear-gradient(120deg,var(--accent2) 0%,var(--violet) 45%,var(--pink) 75%,var(--amber) 100%);border-radius:14px;padding:20px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:14px;color:#fff;}
+.hero-eyebrow{font-size:0.72rem;text-transform:uppercase;letter-spacing:.08em;opacity:.85;}
+.hero h2{margin:2px 0 4px;font-size:1.3rem;color:#fff;}
+.hero .muted{color:rgba(255,255,255,.85);font-size:0.82rem;margin:0 0 12px;}
+.hero-btn{background:#fff;color:var(--accent2);width:auto;padding:9px 16px;margin-top:0;}
+.hero-right{flex:0 0 auto;}
+.qgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;}
+.qcard{background:var(--panel);border:1px solid var(--border);border-radius:13px;padding:14px 6px;display:flex;flex-direction:column;align-items:center;gap:7px;font-size:0.68rem;color:var(--muted);font-family:inherit;text-align:center;box-shadow:0 1px 0 rgba(0,0,0,.15);}
+.qicon{font-size:1.15rem;width:38px;height:38px;border-radius:10px;background:var(--panel2);display:flex;align-items:center;justify-content:center;}
+.qicon.c0{background:rgba(34,211,165,.18);} .qicon.c1{background:rgba(14,165,233,.18);}
+.qicon.c2{background:rgba(255,93,162,.18);} .qicon.c3{background:rgba(167,139,250,.18);}
+.qicon.c4{background:rgba(255,176,32,.18);} .qicon.c5{background:rgba(255,107,107,.18);}
+.qicon.c6{background:rgba(46,230,155,.18);} .qicon.c7{background:rgba(255,194,60,.18);}
+@media (max-width:480px){.qgrid{grid-template-columns:repeat(3,1fr);}}
+.stat{flex:1;background:var(--panel2);border:1px solid var(--border);border-radius:9px;padding:12px;text-align:center;}
+.stat .n{font-family:'Sora',sans-serif;font-size:1.3rem;font-weight:700;}
+.stat .l{font-size:0.7rem;color:var(--muted);margin-top:2px;}
+.cat-label{font-size:.72rem;font-weight:700;color:var(--accent);margin:14px 0 6px;letter-spacing:.03em;}
+.dot.gray{background:#4a4f55;}
+.splash{position:fixed;inset:0;z-index:100;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;animation:splashIn .6s ease;}
+.splash > *{position:relative;z-index:1;}
+.splash.exit{animation:splashOut .7s ease forwards;}
+@keyframes splashIn{from{opacity:0}to{opacity:1}}
+@keyframes splashOut{to{opacity:0;transform:scale(1.08)}}
+.splash .splash-glow{position:absolute;z-index:0;width:520px;height:520px;max-width:140vw;border-radius:50%;background:radial-gradient(circle,rgba(167,139,250,.35),rgba(255,93,162,.18) 40%,transparent 70%);animation:glow 3.6s ease-in-out infinite;}
+@keyframes glow{0%,100%{transform:scale(.8);opacity:.6}50%{transform:scale(1.15);opacity:1}}
+.sp-ring,.sp-x1,.sp-x2{stroke-dasharray:1;animation:draw .9s cubic-bezier(.4,0,.2,1) both;}
+.sp-ring{animation-duration:1.6s;}
+.sp-x1{animation-delay:1s;} .sp-x2{animation-delay:1.5s;}
+@keyframes draw{from{stroke-dashoffset:1;opacity:0}2%{opacity:1}to{stroke-dashoffset:0;opacity:1}}
+.sp-node{transform-box:fill-box;transform-origin:center;animation:pop .7s cubic-bezier(.2,1.4,.4,1) both;}
+@keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+.sp-spark{transform-box:fill-box;transform-origin:center;animation:pulse 1.8s ease-in-out 3s infinite both;}
+@keyframes pulse{0%,100%{transform:scale(.6);opacity:.6}50%{transform:scale(1.4);opacity:1}}
+.sp-orbit{transform-origin:60px 60px;animation:spin 3.6s linear infinite;}
+.sp-word{font-family:'Sora',sans-serif;font-weight:800;font-size:2.4rem;letter-spacing:-.02em;margin-top:18px;color:#fff;display:flex;}
+.sp-word span{display:inline-block;animation:up .8s cubic-bezier(.4,0,.2,1) both;}
+.sp-x{background:linear-gradient(135deg,#0ea5e9,#a78bfa,#ff5da2,#ffb020);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;}
+@keyframes up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.sp-tag{color:#8ba69c;font-size:.85rem;margin-top:8px;letter-spacing:.04em;animation:up 1s 3.9s ease both;}
+.sp-hello{color:#f3f6f4;font-size:.95rem;margin-top:14px;animation:up 1s 4.4s ease both;}
+.sp-bar{width:140px;height:3px;background:#1c1c1c;border-radius:3px;overflow:hidden;margin-top:26px;}
+.sp-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#0ea5e9,#a78bfa,#ff5da2,#ffb020);animation:loadbar 5.2s ease-in-out forwards;}
+@keyframes loadbar{to{width:100%}}
+.ba-row{display:flex;align-items:center;gap:10px;margin:6px 0;font-size:.8rem;}
+.ba-row .muted{width:44px;}
+.ba-bar{flex:1;height:10px;background:var(--panel2);border-radius:6px;overflow:hidden;}
+.ba-bar i{display:block;height:100%;border-radius:6px;}
+.demo-card{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;border-style:dashed;}
+.demo-card .btn{width:auto;margin:0;padding:9px 18px;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script>
+// ================= DATA =================
+// ================= SUBJECTS REGISTRY =================
+// To add a new subject: push a new object here with id, name, level, icon,
+// concepts {id:{name,pre:[]}}, questions [{id,concept,text,options,answer,wrongMap}]
+// and add its misconception keys to MISCONCEPTION_LIB below. Nothing else needs to change —
+// the test engine, X-Ray, misconception detector and intervention pages read from this registry.
+const SUBJECTS = {
+  math:{ name:"Math", level:"school", icon:"📐", cat:"sci",
+    concepts:{
+      c1:{name:"Integer Sign Rules", pre:[]}, c2:{name:"Basic Multiplication", pre:[]},
+      c3:{name:"Linear Equations (1 var)", pre:["c1","c2"]}, c4:{name:"Perimeter vs Area", pre:[]},
+      c5:{name:"Fractions - Simplification", pre:["c2"]}, c6:{name:"Quadratic Equations Intro", pre:["c3"]},
+    },
+    questions:[
+      {id:"q1", concept:"c1", text:"(-8) + 5 = ?", options:["-3","3","-13","13"], answer:0, wrongMap:{1:"sign_error",2:"sign_error",3:"sign_error"}},
+      {id:"q2", concept:"c2", text:"7 × 6 = ?", options:["42","36","48","13"], answer:0, wrongMap:{1:"multiplication_fact",2:"multiplication_fact",3:"multiplication_fact"}},
+      {id:"q3", concept:"c3", text:"Solve: 2x + 4 = 12. x = ?", options:["4","8","6","2"], answer:0, wrongMap:{1:"equation_balance",2:"equation_balance",3:"equation_balance"}},
+      {id:"q4", concept:"c4", text:"A rectangle is 4cm × 3cm. What is its perimeter?", options:["14cm","12cm","7cm","24cm"], answer:0, wrongMap:{1:"perimeter_area_confusion",2:"perimeter_area_confusion",3:"perimeter_area_confusion"}},
+      {id:"q5", concept:"c5", text:"Simplify: 8/12", options:["2/3","4/6","8/12","1/2"], answer:0, wrongMap:{1:"fraction_simplify",2:"fraction_simplify",3:"fraction_simplify"}},
+    ],
+    difficultyQuestions:{
+      easy:[
+        {id:"m_e1", concept:"c2", text:"5 × 4 = ?", options:["20","24","16","9"], answer:0, wrongMap:{1:"multiplication_fact",2:"multiplication_fact",3:"multiplication_fact"}},
+        {id:"m_e2", concept:"c4", text:"A square has side 6cm. Its perimeter is?", options:["24cm","36cm","12cm","18cm"], answer:0, wrongMap:{1:"perimeter_area_confusion",2:"perimeter_area_confusion",3:"perimeter_area_confusion"}},
+      ],
+      medium:[
+        {id:"m_m1", concept:"c1", text:"(-6) + 9 = ?", options:["3","-3","15","-15"], answer:0, wrongMap:{1:"sign_error",2:"sign_error",3:"sign_error"}},
+        {id:"m_m2", concept:"c5", text:"Simplify: 12/18", options:["2/3","6/9","3/4","4/6"], answer:0, wrongMap:{1:"fraction_simplify",2:"fraction_simplify",3:"fraction_simplify"}},
+      ],
+      hard:[
+        {id:"m_h1", concept:"c3", text:"Solve: 5x - 7 = 3x + 9. x = ?", options:["8","6","4","2"], answer:0, wrongMap:{1:"equation_balance",2:"equation_balance",3:"equation_balance"}},
+        {id:"m_h2", concept:"c1", text:"(-12) - (-5) = ?", options:["-7","-17","7","17"], answer:0, wrongMap:{1:"sign_error",2:"sign_error",3:"sign_error"}},
+      ],
+      very_hard:[
+        {id:"m_vh1", concept:"c6", text:"If x² = 49, what are the possible values of x?", options:["7 and -7","7 only","49 and -49","14"], answer:0, wrongMap:{1:"quadratic_confusion",2:"quadratic_confusion",3:"quadratic_confusion"}},
+        {id:"m_vh2", concept:"c3", text:"Solve: 2(x + 3) = 16. x = ?", options:["5","8","10","3"], answer:0, wrongMap:{1:"equation_balance",2:"equation_balance",3:"equation_balance"}},
+      ],
+    }},
+  science:{ name:"Science", level:"school", icon:"🔬", cat:"sci",
+    concepts:{ s1:{name:"States of Matter", pre:[]}, s2:{name:"Force & Motion", pre:[]}, s3:{name:"Photosynthesis", pre:["s1"]}, s4:{name:"Chemical Reactions", pre:[]} },
+    questions:[
+      {id:"sq1", concept:"s1", text:"Ice melting into water is an example of which change?", options:["Solid to liquid","Liquid to gas","Gas to solid","Chemical change"], answer:0, wrongMap:{1:"state_change_confusion",2:"state_change_confusion",3:"state_change_confusion"}},
+      {id:"sq2", concept:"s2", text:"A ball is pushed and stops due to which force?", options:["Friction","Gravity only","Magnetism","No force"], answer:0, wrongMap:{1:"force_confusion",2:"force_confusion",3:"force_confusion"}},
+      {id:"sq3", concept:"s3", text:"Plants make food using sunlight, water and which gas?", options:["Carbon dioxide","Oxygen","Nitrogen","Hydrogen"], answer:0, wrongMap:{1:"photosynthesis_confusion",2:"photosynthesis_confusion",3:"photosynthesis_confusion"}},
+    ],
+    difficultyQuestions:{
+      easy:[
+        {id:"s_e1", concept:"s1", text:"Water boiling into steam is a change from:", options:["Liquid to gas","Solid to liquid","Gas to liquid","Solid to gas"], answer:0, wrongMap:{1:"state_change_confusion",2:"state_change_confusion",3:"state_change_confusion"}},
+        {id:"s_e2", concept:"s2", text:"The force that pulls objects toward Earth is called:", options:["Gravity","Friction","Magnetism","Tension"], answer:0, wrongMap:{1:"force_confusion",2:"force_confusion",3:"force_confusion"}},
+      ],
+      medium:[
+        {id:"s_m1", concept:"s3", text:"Photosynthesis mainly occurs in which part of the plant?", options:["Leaves","Roots","Stem","Flowers"], answer:0, wrongMap:{1:"photosynthesis_confusion",2:"photosynthesis_confusion",3:"photosynthesis_confusion"}},
+        {id:"s_m2", concept:"s2", text:"An object moving at constant speed in a straight line has:", options:["Zero net force","Increasing force","Decreasing force","Infinite force"], answer:0, wrongMap:{1:"force_confusion",2:"force_confusion",3:"force_confusion"}},
+      ],
+      hard:[
+        {id:"s_h1", concept:"s4", text:"When iron rusts, it reacts with:", options:["Oxygen and water","Nitrogen only","Carbon dioxide only","Hydrogen only"], answer:0, wrongMap:{1:"reaction_confusion",2:"reaction_confusion",3:"reaction_confusion"}},
+        {id:"s_h2", concept:"s1", text:"Sublimation is a change directly from:", options:["Solid to gas","Solid to liquid","Liquid to gas","Gas to liquid"], answer:0, wrongMap:{1:"state_change_confusion",2:"state_change_confusion",3:"state_change_confusion"}},
+      ],
+      very_hard:[
+        {id:"s_vh1", concept:"s4", text:"A chemical reaction that releases heat is called:", options:["Exothermic","Endothermic","Neutral","Catalytic"], answer:0, wrongMap:{1:"reaction_confusion",2:"reaction_confusion",3:"reaction_confusion"}},
+        {id:"s_vh2", concept:"s3", text:"The gas released during photosynthesis is:", options:["Oxygen","Carbon dioxide","Nitrogen","Hydrogen"], answer:0, wrongMap:{1:"photosynthesis_confusion",2:"photosynthesis_confusion",3:"photosynthesis_confusion"}},
+      ],
+    }},
+  physics:{ name:"Physics", level:"college", icon:"⚛️", cat:"sci",
+    concepts:{ p1:{name:"Newton's Laws", pre:[]}, p2:{name:"Work & Energy", pre:["p1"]} },
+    questions:[
+      {id:"pq1", concept:"p1", text:"An object at rest stays at rest unless acted on by:", options:["An external force","Time","Gravity always","Nothing needed"], answer:0, wrongMap:{1:"inertia_confusion",2:"inertia_confusion",3:"inertia_confusion"}},
+      {id:"pq2", concept:"p2", text:"Work done = Force × ?", options:["Displacement","Time","Mass","Velocity"], answer:0, wrongMap:{1:"work_energy_confusion",2:"work_energy_confusion",3:"work_energy_confusion"}},
+    ]},
+  economics:{ name:"Economics", level:"college", icon:"📊", cat:"com",
+    concepts:{ e1:{name:"Demand & Supply", pre:[]}, e2:{name:"Opportunity Cost", pre:["e1"]} },
+    questions:[
+      {id:"eq1", concept:"e1", text:"If price rises and nothing else changes, quantity demanded usually:", options:["Falls","Rises","Stays same","Becomes zero"], answer:0, wrongMap:{1:"demand_supply_confusion",2:"demand_supply_confusion",3:"demand_supply_confusion"}},
+      {id:"eq2", concept:"e2", text:"Opportunity cost is best defined as:", options:["Value of the next best alternative given up","Total money spent","Profit earned","Fixed cost only"], answer:0, wrongMap:{1:"opportunity_cost_confusion",2:"opportunity_cost_confusion",3:"opportunity_cost_confusion"}},
+    ]},
+  cs_engg:{ name:"B.Tech (CS/DSA)", level:"college", icon:"💻", cat:"eng",
+    concepts:{ t1:{name:"Time Complexity", pre:[]}, t2:{name:"Data Structures - Stack/Queue", pre:["t1"]} },
+    questions:[
+      {id:"tq1", concept:"t1", text:"Binary search on a sorted array has time complexity:", options:["O(log n)","O(n)","O(n²)","O(1)"], answer:0, wrongMap:{1:"complexity_confusion",2:"complexity_confusion",3:"complexity_confusion"}},
+      {id:"tq2", concept:"t2", text:"Which data structure follows LIFO (Last In First Out)?", options:["Stack","Queue","Array","Linked List"], answer:0, wrongMap:{1:"stack_queue_confusion",2:"stack_queue_confusion",3:"stack_queue_confusion"}},
+    ]},
+  biology:{ name:"Biology", level:"school", icon:"🧬", cat:"sci",
+    concepts:{ b1:{name:"Cell Structure", pre:[]}, b2:{name:"Human Digestive System", pre:["b1"]} },
+    questions:[
+      {id:"bq1", concept:"b1", text:"Which organelle is called the 'powerhouse of the cell'?", options:["Mitochondria","Nucleus","Ribosome","Golgi body"], answer:0, wrongMap:{1:"organelle_confusion",2:"organelle_confusion",3:"organelle_confusion"}},
+      {id:"bq2", concept:"b2", text:"Digestion of starch begins in the:", options:["Mouth","Stomach","Small intestine","Liver"], answer:0, wrongMap:{1:"digestion_confusion",2:"digestion_confusion",3:"digestion_confusion"}},
+    ]},
+  history:{ name:"History", level:"school", icon:"📜", cat:"hum",
+    concepts:{ h1:{name:"Indian Independence Movement", pre:[]}, h2:{name:"World War Timelines", pre:[]} },
+    questions:[
+      {id:"hq1", concept:"h1", text:"The Quit India Movement was launched in which year?", options:["1942","1930","1947","1920"], answer:0, wrongMap:{1:"timeline_confusion",2:"timeline_confusion",3:"timeline_confusion"}},
+      {id:"hq2", concept:"h2", text:"World War II ended in which year?", options:["1945","1939","1918","1950"], answer:0, wrongMap:{1:"timeline_confusion",2:"timeline_confusion",3:"timeline_confusion"}},
+    ]},
+  political_science:{ name:"Political Science", level:"college", icon:"🏛️", cat:"hum",
+    concepts:{ ps1:{name:"Forms of Government", pre:[]}, ps2:{name:"Constitution & Federalism", pre:["ps1"]} },
+    questions:[
+      {id:"psq1", concept:"ps1", text:"A government where power is concentrated in one ruler is called:", options:["Autocracy","Democracy","Federation","Republic only"], answer:0, wrongMap:{1:"govt_form_confusion",2:"govt_form_confusion",3:"govt_form_confusion"}},
+      {id:"psq2", concept:"ps2", text:"In a federal system, power is primarily:", options:["Divided between central and state governments","Held only by the center","Held only by states","Held by the judiciary alone"], answer:0, wrongMap:{1:"federalism_confusion",2:"federalism_confusion",3:"federalism_confusion"}},
+    ]},
+  medical:{ name:"Medical (Anatomy)", level:"college", icon:"🩺", cat:"med",
+    concepts:{ m1:{name:"Cardiovascular System", pre:[]}, m2:{name:"Skeletal System", pre:[]} },
+    questions:[
+      {id:"mq1", concept:"m1", text:"Which chamber of the heart pumps oxygenated blood to the body?", options:["Left ventricle","Right ventricle","Left atrium","Right atrium"], answer:0, wrongMap:{1:"heart_chamber_confusion",2:"heart_chamber_confusion",3:"heart_chamber_confusion"}},
+      {id:"mq2", concept:"m2", text:"The longest bone in the human body is the:", options:["Femur","Humerus","Tibia","Fibula"], answer:0, wrongMap:{1:"bone_confusion",2:"bone_confusion",3:"bone_confusion"}},
+    ]},
+  physiology:{ name:"Physiology", level:"college", icon:"🫀", cat:"med",
+    concepts:{ ph1:{name:"Nervous System Signals", pre:[]}, ph2:{name:"Respiration & Gas Exchange", pre:[]} },
+    questions:[
+      {id:"phq1", concept:"ph1", text:"Nerve impulses are carried by which type of cell?", options:["Neuron","Erythrocyte","Osteocyte","Myocyte"], answer:0, wrongMap:{1:"nerve_cell_confusion",2:"nerve_cell_confusion",3:"nerve_cell_confusion"}},
+      {id:"phq2", concept:"ph2", text:"Gas exchange in the lungs happens in the:", options:["Alveoli","Trachea","Bronchi","Larynx"], answer:0, wrongMap:{1:"gas_exchange_confusion",2:"gas_exchange_confusion",3:"gas_exchange_confusion"}},
+    ]},
+  mechanical:{ name:"Mechanical Engg", level:"college", icon:"⚙️", cat:"eng",
+    concepts:{ me1:{name:"Thermodynamics Basics", pre:[]}, me2:{name:"Stress & Strain", pre:[]} },
+    questions:[
+      {id:"meq1", concept:"me1", text:"The First Law of Thermodynamics is about conservation of:", options:["Energy","Momentum","Mass only","Charge"], answer:0, wrongMap:{1:"thermo_confusion",2:"thermo_confusion",3:"thermo_confusion"}},
+      {id:"meq2", concept:"me2", text:"Stress is defined as force per unit:", options:["Area","Length","Volume","Time"], answer:0, wrongMap:{1:"stress_strain_confusion",2:"stress_strain_confusion",3:"stress_strain_confusion"}},
+    ]},
+  electrical:{ name:"Electrical Engg", level:"college", icon:"🔌", cat:"eng",
+    concepts:{ ee1:{name:"Ohm's Law & Circuits", pre:[]}, ee2:{name:"AC vs DC", pre:[]} },
+    questions:[
+      {id:"eeq1", concept:"ee1", text:"According to Ohm's Law, V = ?", options:["I × R","I / R","I + R","I - R"], answer:0, wrongMap:{1:"ohms_law_confusion",2:"ohms_law_confusion",3:"ohms_law_confusion"}},
+      {id:"eeq2", concept:"ee2", text:"Which current periodically reverses direction?", options:["AC (Alternating Current)","DC (Direct Current)","Static current","No current"], answer:0, wrongMap:{1:"ac_dc_confusion",2:"ac_dc_confusion",3:"ac_dc_confusion"}},
+    ]},
+  civil:{ name:"Civil Engg", level:"college", icon:"🏗️", cat:"eng",
+    concepts:{ ce1:{name:"Structural Loads", pre:[]}, ce2:{name:"Concrete Basics", pre:[]} },
+    questions:[
+      {id:"ceq1", concept:"ce1", text:"A load acting perpendicular to a beam's axis is called:", options:["Transverse load","Axial load","Torsional load","No load"], answer:0, wrongMap:{1:"load_confusion",2:"load_confusion",3:"load_confusion"}},
+      {id:"ceq2", concept:"ce2", text:"The main binding material in concrete is:", options:["Cement","Sand","Gravel","Water only"], answer:0, wrongMap:{1:"concrete_confusion",2:"concrete_confusion",3:"concrete_confusion"}},
+    ]},
+  phy1112:{ name:"Physics (11-12)", level:"senior_school", icon:"🔭", cat:"sci",
+    concepts:{ pp1:{name:"Laws of Motion", pre:[]}, pp2:{name:"Kinematics", pre:["pp1"]}, pp3:{name:"Work-Energy Theorem", pre:["pp1"]} },
+    questions:[
+      {id:"ppq1", concept:"pp1", text:"Newton's Second Law states F = ?", options:["m × a","m + a","m / a","m - a"], answer:0, wrongMap:{1:"newton_law_confusion",2:"newton_law_confusion",3:"newton_law_confusion"}},
+      {id:"ppq2", concept:"pp2", text:"Acceleration is the rate of change of:", options:["Velocity","Distance","Time","Mass"], answer:0, wrongMap:{1:"kinematics_confusion",2:"kinematics_confusion",3:"kinematics_confusion"}},
+    ],
+    difficultyQuestions:{
+      easy:[
+        {id:"p11_e1", concept:"pp1", text:"An object remains at rest unless a force acts on it — this is Newton's:", options:["First Law","Second Law","Third Law","Zeroth Law"], answer:0, wrongMap:{1:"newton_law_confusion",2:"newton_law_confusion",3:"newton_law_confusion"}},
+        {id:"p11_e2", concept:"pp2", text:"Speed is calculated as distance divided by:", options:["Time","Mass","Force","Area"], answer:0, wrongMap:{1:"kinematics_confusion",2:"kinematics_confusion",3:"kinematics_confusion"}},
+      ],
+      medium:[
+        {id:"p11_m1", concept:"pp1", text:"F = ma. If mass doubles and force stays same, acceleration:", options:["Halves","Doubles","Stays same","Becomes zero"], answer:0, wrongMap:{1:"newton_law_confusion",2:"newton_law_confusion",3:"newton_law_confusion"}},
+        {id:"p11_m2", concept:"pp2", text:"An object's velocity changes from 0 to 20 m/s in 4s. Acceleration = ?", options:["5 m/s²","20 m/s²","4 m/s²","80 m/s²"], answer:0, wrongMap:{1:"kinematics_confusion",2:"kinematics_confusion",3:"kinematics_confusion"}},
+      ],
+      hard:[
+        {id:"p11_h1", concept:"pp3", text:"Work-energy theorem states that work done equals change in:", options:["Kinetic energy","Potential energy","Mass","Momentum only"], answer:0, wrongMap:{1:"work_energy_theorem_confusion",2:"work_energy_theorem_confusion",3:"work_energy_theorem_confusion"}},
+        {id:"p11_h2", concept:"pp1", text:"For every action, there is an equal and opposite reaction — this is Newton's:", options:["Third Law","First Law","Second Law","None"], answer:0, wrongMap:{1:"newton_law_confusion",2:"newton_law_confusion",3:"newton_law_confusion"}},
+      ],
+      very_hard:[
+        {id:"p11_vh1", concept:"pp3", text:"A 2kg object moving at 3 m/s has kinetic energy of:", options:["9 J","6 J","18 J","3 J"], answer:0, wrongMap:{1:"work_energy_theorem_confusion",2:"work_energy_theorem_confusion",3:"work_energy_theorem_confusion"}},
+        {id:"p11_vh2", concept:"pp2", text:"A car decelerates from 30 m/s to rest in 6s. Deceleration = ?", options:["5 m/s²","6 m/s²","30 m/s²","180 m/s²"], answer:0, wrongMap:{1:"kinematics_confusion",2:"kinematics_confusion",3:"kinematics_confusion"}},
+      ],
+    }},
+  chem1112:{ name:"Chemistry (11-12)", level:"senior_school", icon:"⚗️", cat:"sci",
+    concepts:{ cc1:{name:"Periodic Table Trends", pre:[]}, cc2:{name:"Chemical Bonding", pre:[]} },
+    questions:[
+      {id:"ccq1", concept:"cc1", text:"Atomic size generally ___ across a period (left to right):", options:["Decreases","Increases","Stays same","Doubles"], answer:0, wrongMap:{1:"periodic_trend_confusion",2:"periodic_trend_confusion",3:"periodic_trend_confusion"}},
+      {id:"ccq2", concept:"cc2", text:"A bond formed by sharing electrons is called:", options:["Covalent bond","Ionic bond","Metallic bond","No bond"], answer:0, wrongMap:{1:"bonding_confusion",2:"bonding_confusion",3:"bonding_confusion"}},
+    ]},
+  accountancy:{ name:"Accountancy (11-12)", level:"senior_school", icon:"📒", cat:"com",
+    concepts:{ ac1:{name:"Accounting Equation", pre:[]}, ac2:{name:"Journal Entries", pre:["ac1"]} },
+    questions:[
+      {id:"acq1", concept:"ac1", text:"The basic accounting equation is:", options:["Assets = Liabilities + Capital","Assets = Liabilities - Capital","Assets = Capital only","Assets = Revenue - Expense"], answer:0, wrongMap:{1:"accounting_eq_confusion",2:"accounting_eq_confusion",3:"accounting_eq_confusion"}},
+      {id:"acq2", concept:"ac2", text:"An increase in an asset account is recorded as a:", options:["Debit","Credit","Neither","Both equally"], answer:0, wrongMap:{1:"journal_confusion",2:"journal_confusion",3:"journal_confusion"}},
+    ]},
+};
+const LEVELS = [["school","🏫 School"],["senior_school","📘 Class 11-12"],["college","🎓 College"]];
+const RETEST_QUESTIONS = [
+  {id:"r1", concept:"c1", text:"(-3) + (-4) = ?", options:["-7","7","-1","1"], answer:0, wrongMap:{1:"sign_error",2:"sign_error",3:"sign_error"}},
+  {id:"r2", concept:"c4", text:"A square has side 5cm. Perimeter?", options:["20cm","25cm","10cm","15cm"], answer:0, wrongMap:{1:"perimeter_area_confusion",2:"perimeter_area_confusion",3:"perimeter_area_confusion"}},
+  {id:"r3", concept:"c3", text:"Solve: 3x - 2 = 10. x = ?", options:["4","3","6","5"], answer:0, wrongMap:{1:"equation_balance",2:"equation_balance",3:"equation_balance"}},
+];
+
+
+const MISCONCEPTION_LIB = {
+  sign_error:{label:"Sign error with negative numbers", tip:"Number line practice: -8 se start karke +5 steps right move karo."},
+  multiplication_fact:{label:"Weak multiplication recall", tip:"Times-table drill 6-7-8 ka daily 5 min practice."},
+  equation_balance:{label:"Confuses balancing steps in equations", tip:"'Jo left pe karo, wahi right pe karo' rule practice karo step by step."},
+  perimeter_area_confusion:{label:"Confuses perimeter with area formula", tip:"Perimeter = boundary (add all sides), Area = space inside (multiply)."},
+  fraction_simplify:{label:"Doesn't reduce fraction to lowest terms", tip:"GCD nikaal ke numerator/denominator dono ko divide karna practice karo."},
+  state_change_confusion:{label:"Confuses states of matter transitions", tip:"Melting/freezing/evaporation diagram baar baar dekho."},
+  force_confusion:{label:"Doesn't identify friction as a force", tip:"Real-life examples se samjho: table pe gilaas ghisne se rukta hai — friction."},
+  photosynthesis_confusion:{label:"Confuses photosynthesis inputs/outputs", tip:"CO2 + water + sunlight → glucose + O2, is equation ko yaad karo."},
+  inertia_confusion:{label:"Doesn't apply Newton's First Law correctly", tip:"'Object apni state change nahi karta bina force ke' — real examples se practice karo."},
+  work_energy_confusion:{label:"Confuses work formula components", tip:"Work = Force × Displacement (same direction), formula baar baar likho."},
+  demand_supply_confusion:{label:"Confuses demand-price relationship", tip:"Demand curve downward-sloping hota hai — graph baar baar draw karo."},
+  opportunity_cost_confusion:{label:"Confuses opportunity cost with money spent", tip:"Opportunity cost = best alternative given up, na ki actual paisa."},
+  complexity_confusion:{label:"Confuses time complexity of algorithms", tip:"Binary search har step me search space aadha karta hai — O(log n). Dry-run karke dekho."},
+  stack_queue_confusion:{label:"Confuses Stack (LIFO) vs Queue (FIFO)", tip:"Stack = plates ka dher (upar se nikalo), Queue = line (aage se nikalo)."},
+  organelle_confusion:{label:"Confuses cell organelle functions", tip:"Mitochondria = energy, Nucleus = control center — har organelle ka ek real-life analogy banao."},
+  digestion_confusion:{label:"Confuses digestion process sequence", tip:"Mouth → Stomach → Small Intestine sequence ko diagram se yaad karo."},
+  timeline_confusion:{label:"Confuses historical dates/timelines", tip:"Ek timeline chart banao aur major events us par mark karo."},
+  govt_form_confusion:{label:"Confuses forms of government", tip:"Autocracy = ek vyakti, Democracy = janta — definitions ko compare table me likho."},
+  federalism_confusion:{label:"Confuses federal vs unitary power distribution", tip:"Federal = power divided (center + states), Unitary = sirf center — do column table banao."},
+  heart_chamber_confusion:{label:"Confuses heart chamber functions", tip:"Left side = oxygenated blood body ko, Right side = deoxygenated blood lungs ko — diagram baar baar dekho."},
+  bone_confusion:{label:"Confuses bone names/sizes", tip:"Femur (thigh) sabse lamba bone hai — skeleton diagram se labels practice karo."},
+  nerve_cell_confusion:{label:"Confuses nerve cell function", tip:"Neuron = signal carrier cell — real-life 'electric wire' analogy use karo."},
+  gas_exchange_confusion:{label:"Confuses site of gas exchange in lungs", tip:"Alveoli = tiny air sacs jahan O2/CO2 exchange hota hai — diagram baar baar dekho."},
+  thermo_confusion:{label:"Confuses First Law of Thermodynamics", tip:"Energy conserve hoti hai, create/destroy nahi hoti — simple examples se practice karo."},
+  stress_strain_confusion:{label:"Confuses stress formula", tip:"Stress = Force / Area, formula ko unit ke saath likh ke yaad karo."},
+  ohms_law_confusion:{label:"Confuses Ohm's Law formula", tip:"V = I × R — triangle method se yaad karo (V upar, I aur R niche)."},
+  ac_dc_confusion:{label:"Confuses AC vs DC current", tip:"AC = alternating (ghar ki supply), DC = direct (battery) — real examples se yaad karo."},
+  load_confusion:{label:"Confuses types of structural loads", tip:"Transverse load beam ke axis ke perpendicular lagta hai — diagram se samjho."},
+  concrete_confusion:{label:"Confuses concrete composition", tip:"Cement + sand + gravel + water — cement hi main binding agent hai."},
+  newton_law_confusion:{label:"Confuses Newton's Second Law formula", tip:"F = m × a — units ke saath practice karo (Newton = kg·m/s²)."},
+  kinematics_confusion:{label:"Confuses velocity vs acceleration", tip:"Velocity = displacement/time, Acceleration = velocity change/time — do alag formulas."},
+  periodic_trend_confusion:{label:"Confuses periodic table trends", tip:"Atomic size left→right decreases (protons badhte hain, electrons pull hote hain)."},
+  bonding_confusion:{label:"Confuses covalent vs ionic bonding", tip:"Covalent = sharing electrons, Ionic = transfer electrons — do column table banao."},
+  accounting_eq_confusion:{label:"Confuses the accounting equation", tip:"Assets = Liabilities + Capital — hamesha balance hona chahiye, practice karo."},
+  journal_confusion:{label:"Confuses debit/credit rules", tip:"Asset badhne pe Debit, kam hone pe Credit — rule table banao aur practice karo."},
+  quadratic_confusion:{label:"Forgets both roots of a quadratic (±)", tip:"x² = 49 ka matlab x = +7 ya -7 dono — square root lete waqt ± mat bhoolo."},
+  reaction_confusion:{label:"Confuses chemical reaction types", tip:"Exothermic = heat release, Endothermic = heat absorb — real examples yaad karo."},
+  work_energy_theorem_confusion:{label:"Confuses work-energy theorem", tip:"Work done = ΔKE = ½mv² (final) - ½mv² (initial), formula practice karo."},
+};
+const STUDENTS_MOCK = [
+  {name:"Aarav", weak:["sign_error","equation_balance"]},
+  {name:"Diya", weak:["perimeter_area_confusion"]},
+  {name:"Kabir", weak:["multiplication_fact","fraction_simplify","sign_error"]},
+];
+
+// ================= CATEGORIES + DIFFICULTY-TIERED CONTENT =================
+const CATS = {sci:"🔬 Science & Maths", eng:"🛠️ Engineering", med:"🩺 Medical", com:"💼 Commerce & Economics", hum:"📜 Humanities"};
+const CAT_ORDER = ["sci","eng","med","com","hum"];
+const mkQ = (id,concept,difficulty,text,options,m)=>({id,concept,difficulty,text,options,answer:0,wrongMap:{1:m,2:m,3:m}});
+function permQ(q,perm){
+  const options = perm.map(o=>q.options[o]);
+  const wrongMap = {};
+  perm.forEach((o,ni)=>{ if(o!==q.answer && q.wrongMap[o]) wrongMap[ni]=q.wrongMap[o]; });
+  return {...q, options, answer:perm.indexOf(q.answer), wrongMap};
+}
+function shuffleArr(a){ const b=a.slice(); for(let i=b.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [b[i],b[j]]=[b[j],b[i]]; } return b; }
+function shuffleQ(q){ return permQ(q, shuffleArr([0,1,2,3])); }
+[[2,0,1,3],[1,2,3,0],[3,1,0,2]].forEach((p,i)=>{ RETEST_QUESTIONS[i]=permQ(RETEST_QUESTIONS[i],p); });
+
+function subjectGroups(list){
+  return CAT_ORDER.map(c=>{
+    const items = list.filter(([,s])=>s.cat===c);
+    if(!items.length) return '';
+    return `<div class="cat-label">${CATS[c]}</div><div class="subject-grid">${items.map(([id,s])=>`<button class="${state.subject===id?'active':''}" onclick="setSubject('${id}')">${s.icon}<br>${s.name}</button>`).join('')}</div>`;
+  }).join('');
+}
+
+Object.assign(SUBJECTS.math.concepts,{c6:{name:"Quadratic Equations",pre:["c3"]},c7:{name:"Percentages & Ratios",pre:["c2"]},c8:{name:"Pythagoras & Geometry",pre:["c4"]}});
+Object.assign(SUBJECTS.phy1112.concepts,{pp3:{name:"Work, Energy & Power",pre:["pp1"]}});
+Object.assign(SUBJECTS.biology.concepts,{b3:{name:"Genetics Basics",pre:["b1"]}});
+
+Object.assign(MISCONCEPTION_LIB,{
+  quadratic_confusion:{label:"Confuses roots/discriminant of quadratics",tip:"Factorise ya discriminant b²−4ac use karo — roots ke signs check karo."},
+  percent_confusion:{label:"Mixes up percentage change steps",tip:"Percent hamesha current value pe lagta hai — step-by-step nayi value nikaalo."},
+  pythag_confusion:{label:"Misapplies Pythagoras theorem",tip:"a² + b² = c² (c = hypotenuse) — pehle sabse lamba side pehchaano."},
+  fraction_op_confusion:{label:"Adds numerators and denominators directly",tip:"Fractions add karne se pehle common denominator banao."},
+  area_formula_confusion:{label:"Forgets ½ in triangle area",tip:"Triangle area = ½ × base × height — rectangle ka aadha."},
+  genetics_confusion:{label:"Confuses genotype vs phenotype ratios",tip:"Punnett square banao — genotype (1:2:1) aur phenotype (3:1) alag count karo."},
+  osmosis_confusion:{label:"Confuses direction of osmosis",tip:"Paani low solute → high solute side jaata hai — diagram se dekho."}
+});
+
+const tagDiff=(sid,map)=>SUBJECTS[sid].questions.forEach(q=>{ if(map[q.id]) q.difficulty=map[q.id]; });
+tagDiff('math',{q1:'easy',q2:'easy',q3:'medium',q4:'medium',q5:'medium'});
+tagDiff('phy1112',{ppq1:'easy',ppq2:'easy'});
+tagDiff('biology',{bq1:'easy',bq2:'medium'});
+
+SUBJECTS.math.questions.push(
+ mkQ("me1","c2","easy","9 × 8 = ?",["72","81","64","63"],"multiplication_fact"),
+ mkQ("me2","c1","easy","(-6) + (-2) = ?",["-8","8","-4","4"],"sign_error"),
+ mkQ("me3","c5","easy","1/2 + 1/4 = ?",["3/4","2/6","1/6","2/4"],"fraction_op_confusion"),
+ mkQ("me4","c4","easy","Perimeter of a square with side 6 cm?",["24 cm","36 cm","12 cm","18 cm"],"perimeter_area_confusion"),
+ mkQ("mm1","c3","medium","Solve: 3x − 5 = 16. x = ?",["7","3","21","11/3"],"equation_balance"),
+ mkQ("mm2","c7","medium","20% of 250 = ?",["50","20","25","500"],"percent_confusion"),
+ mkQ("mm3","c4","medium","Area of a triangle with base 10 and height 6?",["30","60","16","32"],"area_formula_confusion"),
+ mkQ("mm4","c1","medium","(-4) × (-5) = ?",["20","-20","-9","9"],"sign_error"),
+ mkQ("mh1","c6","hard","Roots of x² − 5x + 6 = 0 are:",["2 and 3","-2 and -3","1 and 6","-1 and -6"],"quadratic_confusion"),
+ mkQ("mh2","c8","hard","A right triangle has legs 6 and 8. Hypotenuse = ?",["10","14","12","48"],"pythag_confusion"),
+ mkQ("mh3","c7","hard","Price rises 20% then falls 20%. Net change?",["4% decrease","No change","4% increase","20% decrease"],"percent_confusion"),
+ mkQ("mh4","c3","hard","Solve: 2(x + 3) = 3x − 4. x = ?",["10","-10","2","-2"],"equation_balance"),
+ mkQ("mv1","c6","very_hard","x² + kx + 9 = 0 has equal roots. k = ?",["±6","±3","6 only","9"],"quadratic_confusion"),
+ mkQ("mv2","c8","very_hard","A rectangle's diagonal is 17 and one side is 8. Its area = ?",["120","136","68","15"],"pythag_confusion"),
+ mkQ("mv3","c7","very_hard","Marked up 40%, then 25% discount. Profit %?",["5%","15%","10%","0%"],"percent_confusion"),
+ mkQ("mv4","c3","very_hard","Two numbers sum to 20; twice the larger is 5 more than thrice the smaller. Larger = ?",["13","7","15","12"],"equation_balance")
+);
+SUBJECTS.phy1112.questions.push(
+ mkQ("pe1","pp1","easy","SI unit of force?",["Newton","Joule","Watt","Pascal"],"newton_law_confusion"),
+ mkQ("pe2","pp2","easy","A car covers 120 km in 2 h. Average speed?",["60 km/h","240 km/h","120 km/h","30 km/h"],"kinematics_confusion"),
+ mkQ("pe3","pp3","easy","SI unit of energy?",["Joule","Watt","Newton","Volt"],"work_energy_confusion"),
+ mkQ("pm1","pp1","medium","A 5 kg body accelerates at 3 m/s². Net force?",["15 N","8 N","1.67 N","0.6 N"],"newton_law_confusion"),
+ mkQ("pm2","pp2","medium","From rest with a = 2 m/s², velocity after 5 s?",["10 m/s","7 m/s","25 m/s","2.5 m/s"],"kinematics_confusion"),
+ mkQ("pm3","pp3","medium","Kinetic energy of a 2 kg mass moving at 3 m/s?",["9 J","6 J","18 J","3 J"],"work_energy_confusion"),
+ mkQ("ph1","pp2","hard","A stone falls from 45 m (g = 10 m/s²). Time to reach ground?",["3 s","4.5 s","9 s","2 s"],"kinematics_confusion"),
+ mkQ("ph2","pp3","hard","600 J of work done in 20 s. Power?",["30 W","12000 W","580 W","0.03 W"],"work_energy_confusion"),
+ mkQ("ph3","pp1","hard","Masses 2 kg and 3 kg on a frictionless pulley (g = 10). Acceleration?",["2 m/s²","5 m/s²","1 m/s²","10 m/s²"],"newton_law_confusion"),
+ mkQ("pv1","pp2","very_hard","Projectile at 20 m/s, 30° to horizontal. Max height (g = 10)?",["5 m","10 m","20 m","2.5 m"],"kinematics_confusion"),
+ mkQ("pv2","pp3","very_hard","Spring k = 200 N/m compressed 0.1 m. Stored energy?",["1 J","10 J","20 J","0.5 J"],"work_energy_confusion"),
+ mkQ("pv3","pp1","very_hard","10 kg block on a frictionless 30° incline. Acceleration down the slope (g = 10)?",["5 m/s²","10 m/s²","8.66 m/s²","2.5 m/s²"],"newton_law_confusion")
+);
+SUBJECTS.biology.questions.push(
+ mkQ("be1","b1","easy","Which organelle is the control center of the cell?",["Nucleus","Mitochondria","Ribosome","Vacuole"],"organelle_confusion"),
+ mkQ("be2","b2","easy","Which enzyme in saliva starts starch digestion?",["Amylase","Pepsin","Lipase","Trypsin"],"digestion_confusion"),
+ mkQ("be3","b3","easy","Genes are segments of which molecule?",["DNA","Protein","Lipid","Starch"],"genetics_confusion"),
+ mkQ("bm1","b1","medium","Protein synthesis takes place at the:",["Ribosome","Golgi body","Lysosome","Nucleolus"],"organelle_confusion"),
+ mkQ("bm2","b2","medium","Most nutrient absorption occurs in the:",["Small intestine","Stomach","Large intestine","Oesophagus"],"digestion_confusion"),
+ mkQ("bm3","b3","medium","Tt × Tt (T dominant) gives phenotypic ratio:",["3:1","1:1","1:2:1","9:3:3:1"],"genetics_confusion"),
+ mkQ("bh1","b1","hard","Besides the nucleus, which organelle has its own DNA?",["Mitochondria","Golgi body","Lysosome","Smooth ER"],"organelle_confusion"),
+ mkQ("bh2","b2","hard","Bile made by the liver is stored in the:",["Gall bladder","Pancreas","Stomach","Spleen"],"digestion_confusion"),
+ mkQ("bh3","b3","hard","Genotypic ratio of Tt × Tt is:",["1:2:1","3:1","1:1","2:1:1"],"genetics_confusion"),
+ mkQ("bv1","b1","very_hard","In osmosis, water moves from:",["Low solute to high solute concentration","High solute to low solute concentration","Only via active transport","Only from cell to outside"],"osmosis_confusion"),
+ mkQ("bv2","b2","very_hard","Emulsification of fats in the small intestine is done by:",["Bile salts","Lipase","Pepsin","HCl"],"digestion_confusion"),
+ mkQ("bv3","b3","very_hard","Offspring ratio of a test cross Tt × tt:",["1:1","3:1","1:2:1","All tall"],"genetics_confusion")
+);
+
+// ================= STATE =================
+let state = {
+  user:null, authMode:"login", authRole:"student", authError:"",
+  tab:"dashboard", answers:{}, submitted:false, results:null,
+  points:0, badges:[], retestAnswers:{}, retestSubmitted:false, retestResults:null,
+  ragText:"", ragConcepts:null, handwritingDone:false, drawerOpen:false,
+  theme:"dark", lang:"hi", subject:"math", level:"school", onboardStep:-1, analyzing:false,
+  testConfig:{duration:15, difficulty:"medium", count:10}, testStarted:false, testQuestions:[]
+};
+
+const I18N = {
+  hi:{
+    dashboard:"डैशबोर्ड",test:"डायग्नोस्टिक टेस्ट",misconception:"मिसकॉन्सेप्शन डिटेक्टर",xray:"लर्निंग एक्स-रे",
+    intervention:"इंटरवेंशन",retest:"रीटेस्ट + रिज़ॉल्यूशन",remedial:"एआई रेमेडियल प्लान",forgetting:"रिवीज़न शेड्यूल",
+    voice:"वॉइस इंटरैक्शन",handwriting:"हैंडराइटन एनालिसिस",rag:"RAG/PDF लर्निंग",gamify:"गेमिफिकेशन",
+    teacher:"क्लास डैशबोर्ड",
+    overview:"ओवरव्यू", learn:"सीखें", tools:"टूल्स", progress:"प्रोग्रेस", settings:"सेटिंग्स",
+    welcome:"नमस्ते", snapshot:"आपका पर्सनल लर्निंग स्नैपशॉट",
+    points:"पॉइंट्स", badges:"बैज", gaps:"कमज़ोर कॉन्सेप्ट्स", startTest:"डायग्नोस्टिक टेस्ट शुरू करो", retakeTest:"टेस्ट दोबारा दो",
+    status:"स्टेटस", pending:"बाकी", completed:"पूरा हुआ", logout:"लॉगआउट", darkmode:"डार्क मोड",
+    testDesc:"5 सवाल • कॉन्सेप्ट के हिसाब से टैग किए गए", submitTest:"टेस्ट सबमिट करो",
+    aiAnalysis:"एआई आंसर एनालिसिस", misconceptionDesc:"हर गलत जवाब को मिसकॉन्सेप्शन टैक्सोनॉमी से मैप किया गया है", noMisc:"कोई मिसकॉन्सेप्शन नहीं मिली 🎉",
+    xrayDesc:"प्रीरिक्विज़िट नॉलेज ग्राफ — मास्टरी के हिसाब से रंग-कोडेड",
+    interventionDesc:"आपकी कमज़ोरी पर बने माइक्रो-लेसन", interventionClear:"कोई कमज़ोर कॉन्सेप्ट नहीं। सब क्लियर है! 🎉", takeRetest:"रीटेस्ट दो",
+    retestDesc:"कमज़ोर कॉन्सेप्ट्स पर नए सवाल", submitRetest:"रीटेस्ट सबमिट करो", resolutionSummary:"रिज़ॉल्यूशन समरी", resolved:"ठीक हो गया!", stillWeak:"कुछ मिसकॉन्सेप्शन अभी भी बाकी हैं, रेमेडियल प्लान देखो।",
+    remedialDesc:"आपके लेटेस्ट रिज़ल्ट पर बना 7-दिन का प्लान", remedialClear:"कोई एक्शन ज़रूरी नहीं — सब मज़बूत है!",
+    practiceQ:"अभ्यास प्रश्न", miniQuiz:"फिर एक 5-सवाल की मिनी क्विज़।",
+    forgettingDesc:"स्पेस्ड रिपीटिशन — दिन 1, 3, 7, 14", forgettingClear:"सब कॉन्सेप्ट मज़बूत हैं — कोई रिवीज़न बाकी नहीं।",
+    voiceDesc:"ब्राउज़र की बिल्ट-इन स्पीच से सवाल सुनो", voiceBtn:"🔊 सैंपल सवाल सुनो", speaking:"बोल रहा है...",
+    handwritingDesc:"मॉक: हाथ से लिखे उत्तर की फोटो अपलोड सिमुलेट करो", uploadTxt:"📷 हैंडराइटन आंसर शीट अपलोड सिमुलेट करने के लिए टैप करो", simulateUpload:"अपलोड + एनालिसिस सिमुलेट करो", ocrResult:"OCR + एनालिसिस रिज़ल्ट (मॉक)",
+    ragDesc:"अपने नोट्स पेस्ट करो — मुख्य कॉन्सेप्ट निकाले जाएंगे", ragPlaceholder:"यहाँ नोट्स या PDF टेक्स्ट पेस्ट करो...", ragBtn:"मुख्य कॉन्सेप्ट निकालो", ragResult:"निकाले गए कॉन्सेप्ट (मॉक)",
+    teacherDesc:"क्लास-वाइड व्यू", goToTest:"टेस्ट पर जाओ", emptyMsg:"पहले डायग्नोस्टिक टेस्ट पूरा करो।",
+    occurrences:"बार पाया गया",
+  },
+  en:{
+    dashboard:"Dashboard",test:"Diagnostic Test",misconception:"Misconception Detector",xray:"Learning X-Ray",
+    intervention:"Intervention",retest:"Retest + Resolution",remedial:"AI Remedial Plan",forgetting:"Revision Schedule",
+    voice:"Voice Interaction",handwriting:"Handwritten Analysis",rag:"RAG/PDF Learning",gamify:"Gamification",
+    teacher:"Class Dashboard",
+    overview:"Overview", learn:"Learn", tools:"Tools", progress:"Progress", settings:"Settings",
+    welcome:"Welcome", snapshot:"Your personal learning snapshot",
+    points:"Points", badges:"Badges", gaps:"Gaps found", startTest:"Start Diagnostic Test", retakeTest:"Retake Test",
+    status:"Status", pending:"Pending", completed:"Completed", logout:"Logout", darkmode:"Dark Mode",
+    testDesc:"5 questions • concept-tagged", submitTest:"Submit Test",
+    aiAnalysis:"AI Answer Analysis", misconceptionDesc:"Every wrong answer is mapped to the misconception taxonomy", noMisc:"No misconceptions detected 🎉",
+    xrayDesc:"Prerequisite knowledge graph — color coded by mastery",
+    interventionDesc:"Targeted micro-lessons for your gaps", interventionClear:"No weak concepts. All clear! 🎉", takeRetest:"Take Retest",
+    retestDesc:"Fresh questions on your weak concepts", submitRetest:"Submit Retest", resolutionSummary:"Resolution Summary", resolved:"resolved!", stillWeak:"Some misconceptions remain — check the remedial plan.",
+    remedialDesc:"7-day plan based on your latest results", remedialClear:"No action needed — you're solid!",
+    practiceQ:"Practice question", miniQuiz:"Followed by a 5-question mini quiz.",
+    forgettingDesc:"Spaced repetition — Day 1, 3, 7, 14", forgettingClear:"All concepts strong — no revision due.",
+    voiceDesc:"Hear the question using your browser's built-in speech", voiceBtn:"🔊 Read sample question aloud", speaking:"Speaking...",
+    handwritingDesc:"Mock: simulate uploading a photo of a handwritten answer", uploadTxt:"📷 Tap to simulate upload of handwritten answer sheet", simulateUpload:"Simulate Upload & Analyze", ocrResult:"OCR + Analysis Result (mock)",
+    ragDesc:"Paste your notes — key concepts will be extracted", ragPlaceholder:"Paste notes or PDF text here...", ragBtn:"Extract Key Concepts", ragResult:"Extracted Concepts (mock)",
+    teacherDesc:"Class-wide view", goToTest:"Go to Test", emptyMsg:"Complete the diagnostic test first.",
+    occurrences:"occurrence(s)",
+  }
+};
+function t(key){ return (I18N[state.lang] && I18N[state.lang][key]) || key; }
+try{
+  const saved = localStorage.getItem("edutwin_state_v3");
+  if(saved) state = {...state, ...JSON.parse(saved)};
+}catch(e){}
+
+function save(){ try{ localStorage.setItem("edutwin_state_v3", JSON.stringify(state)); }catch(e){} }
+function applyTheme(){ document.documentElement.setAttribute('data-theme', state.theme); }
+function toggleTheme(){ state.theme = state.theme==="dark" ? "light" : "dark"; applyTheme(); save(); render(); }
+function toggleLang(){ state.lang = state.lang==="hi" ? "en" : "hi"; save(); render(); }
+function getUsers(){ try{ return JSON.parse(localStorage.getItem("edutwin_users")||"{}"); }catch(e){ return {}; } }
+function saveUsers(u){ try{ localStorage.setItem("edutwin_users", JSON.stringify(u)); }catch(e){} }
+
+// ================= AUTH =================
+function doAuth(){
+  const name = document.getElementById('authName') ? document.getElementById('authName').value.trim() : "";
+  const email = document.getElementById('authEmail').value.trim().toLowerCase();
+  const pass = document.getElementById('authPass').value;
+  const users = getUsers();
+  if(!email || !pass || (state.authMode==="signup" && !name)){
+    state.authError = "Sab fields bharo."; render(); return;
+  }
+  if(state.authMode==="signup"){
+    if(users[email]){ state.authError = "Ye email already registered hai."; render(); return; }
+    users[email] = {name, pass, role: state.authRole};
+    saveUsers(users);
+    state.user = {name, email, role: state.authRole};
+    state.authError = "";
+  } else {
+    const u = users[email];
+    if(!u || u.pass !== pass){ state.authError = "Email ya password galat hai."; render(); return; }
+    state.user = {name:u.name, email, role:u.role};
+    state.authError = "";
+  }
+  state.tab = state.user.role === "teacher" ? "teacher" : "dashboard";
+  state.onboardStep = (state.authMode==="signup" && state.user.role==="student") ? 0 : -1;
+  save(); playSplash();
+}
+function logout(){ state.user = null; save(); render(); }
+
+// ================= ANALYSIS ENGINE =================
+function analyze(qSet, answerKey, resultKey, submittedKey){
+  const concepts = {}, misconceptions = {};
+  qSet.forEach(q=>{
+    const chosen = state[answerKey][q.id];
+    const correct = chosen === q.answer;
+    if(!concepts[q.concept]) concepts[q.concept] = {correct:0,total:0};
+    concepts[q.concept].total++;
+    if(correct){ concepts[q.concept].correct++; state.points += 10; }
+    else if(chosen !== undefined){
+      const m = q.wrongMap[chosen];
+      if(m) misconceptions[m] = (misconceptions[m]||0)+1;
+    }
+  });
+  const mastery = {};
+  Object.entries(concepts).forEach(([cid,v])=>{
+    mastery[cid] = v.correct/v.total >= 1 ? "green" : v.correct/v.total > 0 ? "yellow" : "red";
+  });
+  state[resultKey] = {mastery, misconceptions};
+  state[submittedKey] = true;
+  checkBadges();
+  save();
+}
+function checkBadges(){
+  if(state.points >= 20 && !state.badges.includes("Starter")) state.badges.push("Starter");
+  if(state.results && Object.keys(state.results.misconceptions).length===0 && !state.badges.includes("Concept Master")) state.badges.push("Concept Master");
+  if(state.retestSubmitted && !state.badges.includes("Comeback Kid")) state.badges.push("Comeback Kid");
+}
+
+// ================= NAV =================
+const TABS_STUDENT = [
+  ["dashboard","dashboard","grp:overview"],
+  ["test","test"], ["misconception","misconception"], ["xray","xray"],
+  ["intervention","intervention","grp:learn"], ["retest","retest"], ["remedial","remedial"],
+  ["forgetting","forgetting"],
+  ["voice","voice","grp:tools"], ["handwriting","handwriting"], ["rag","rag"],
+  ["gamify","gamify","grp:progress"],
+];
+const TABS_TEACHER = [["teacher","teacher","grp:overview"]];
+
+function tabsFor(){ return state.user && state.user.role==="teacher" ? TABS_TEACHER : TABS_STUDENT; }
+
+// ================= PAGES =================
+function emptyState(target){
+  return `<div class="card"><p class="empty">${t('emptyMsg')}</p><button class="btn" onclick="goto('${target}')">${t('goToTest')}</button></div>`;
+}
+
+function masteryPct(){
+  if(!state.submitted) return 0;
+  const vals = Object.values(state.retestSubmitted && state.retestResults ? {...state.results.mastery, ...state.retestResults.mastery} : state.results.mastery);
+  if(!vals.length) return 0;
+  const score = vals.reduce((s,c)=> s + (c==='green'?1:c==='yellow'?0.5:0), 0);
+  return Math.round((score/vals.length)*100);
+}
+
+function pageDashboard(){
+  const done = state.submitted;
+  const pct = masteryPct();
+  const circ = 2*Math.PI*40;
+  const offset = circ - (circ*pct/100);
+  const quick = [
+    ["test","📝",t('test')],["misconception","🔍",t('misconception')],["xray","🩻",t('xray')],
+    ["intervention","🎯",t('intervention')],["retest","🔁",t('retest')],["remedial","📋",t('remedial')],
+    ["forgetting","🧠",t('forgetting')],["gamify","🏆",t('gamify')],
+  ];
+  return `
+    <div class="hero">
+      <div class="hero-left">
+        <div class="hero-eyebrow">${t('welcome')} back</div>
+        <h2>${state.user.name.split(' ')[0]} 👋</h2>
+        <p class="muted">${t('snapshot')}</p>
+        <button class="btn hero-btn" onclick="goto('test')">${done?t('retakeTest'):t('startTest')}</button>
+      </div>
+      <div class="hero-right">
+        <svg width="100" height="100" viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="9"/>
+          <circle cx="50" cy="50" r="40" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round"
+            stroke-dasharray="${circ}" stroke-dashoffset="${offset}" transform="rotate(-90 50 50)"/>
+          <text x="50" y="47" text-anchor="middle" font-size="20" font-weight="700" fill="#fff" font-family="Sora,sans-serif">${pct}%</text>
+          <text x="50" y="64" text-anchor="middle" font-size="9" fill="rgba(255,255,255,.8)">mastery</text>
+        </svg>
+      </div>
+    </div>
+    <div class="stat-row" style="margin-bottom:14px">
+      <div class="stat"><div class="n">${state.points}</div><div class="l">${t('points')}</div></div>
+      <div class="stat"><div class="n">${state.badges.length}</div><div class="l">${t('badges')}</div></div>
+      <div class="stat"><div class="n">${done ? Object.keys(state.results.misconceptions).length : '-'}</div><div class="l">${t('gaps')}</div></div>
+    </div>
+    <div class="qgrid">
+      ${quick.map(([id,icon,label],idx)=>`<button class="qcard" onclick="goto('${id}')"><span class="qicon c${idx%8}">${icon}</span><span>${label}</span></button>`).join('')}
+    </div>
+    <div class="card demo-card"><div><strong>🎬 Demo mode</strong><div class="muted" style="margin-top:2px">Load a ready-made student journey (replaces current results)</div></div><button class="btn secondary" onclick="loadDemo()">Load</button></div>`;
+}
+
+function activeConcepts(){ return SUBJECTS[state.subject].concepts; }
+function activeQuestions(){ return SUBJECTS[state.subject].questions; }
+function setSubject(s){ state.subject = s; state.answers = {}; state.submitted = false; state.results = null; state.testStarted = false; state.retestQuestions=[]; state.retestAnswers={}; state.retestSubmitted=false; state.retestResults=null; save(); render(); }
+function setLevel(l){ state.level = l; const list = Object.entries(SUBJECTS).filter(([,s])=>s.level===l); list.sort((a,b)=>CAT_ORDER.indexOf(a[1].cat)-CAT_ORDER.indexOf(b[1].cat)); setSubject(list[0][0]); }
+
+let timerId = null;
+
+function pageTest(){
+  const levelSubjects = Object.entries(SUBJECTS).filter(([,s])=>s.level===state.level);
+  const configCard = `<div class="card"><h2>${t('test')}</h2><p class="muted">${t('testDesc')}</p>
+    <div class="picker-label">Level</div>
+    <div class="level-row">${LEVELS.map(([id,label])=>`<button class="${state.level===id?'active':''}" onclick="setLevel('${id}')">${label}</button>`).join('')}</div>
+    <div class="picker-label">Subject</div>
+    ${subjectGroups(levelSubjects)}
+    </div>`;
+
+  if(!state.testStarted){
+    const durations = [10,15,20,30];
+    const diffs = [["easy","Easy"],["medium","Medium"],["hard","Hard"],["very_hard","Very Hard"]];
+    const counts = [10,20,30];
+    return configCard + `<div class="card">
+      <div class="picker-label">Duration (minutes)</div>
+      <div class="level-row">${durations.map(d=>`<button class="${state.testConfig.duration===d?'active':''}" onclick="setTestConfig('duration',${d})">${d} min</button>`).join('')}</div>
+      <div class="picker-label">Difficulty</div>
+      <div class="level-row">${diffs.map(([id,label])=>`<button class="${state.testConfig.difficulty===id?'active':''}" onclick="setTestConfig('difficulty','${id}')">${label}</button>`).join('')}</div>
+      <div class="picker-label">Number of Questions</div>
+      <div class="level-row">${counts.map(c=>`<button class="${state.testConfig.count===c?'active':''}" onclick="setTestConfig('count',${c})">${c} Qs</button>`).join('')}</div>
+      <p class="muted" style="margin-top:10px">${SUBJECTS[state.subject].questions.some(q=>q.difficulty)?'✅ Difficulty-graded question bank':'ℹ️ Basic question set for this subject (difficulty levels coming soon)'}</p>
+      <button class="btn" onclick="startTest()">Start Test →</button>
+    </div>`;
+  }
+
+  const qs = state.testQuestions;
+  let html = `<div class="card timer-card"><div>⏱ <strong id="timerDisplay">${fmtTime(state.timeLeft)}</strong></div>
+    <div class="muted" style="font-size:0.75rem">${state.testConfig.count} Qs • ${state.testConfig.difficulty.replace('_',' ')}</div></div>`;
+  qs.forEach(q=>{
+    html += `<div class="card"><div class="q"><p>${q.text}</p>`;
+    q.options.forEach((opt,i)=>{
+      const sel = state.answers[q.id]===i;
+      html += `<button class="opt ${sel?'selected':''}" onclick="pick('${q.id}',${i})">${opt}</button>`;
+    });
+    html += `</div></div>`;
+  });
+  const allAnswered = qs.every(q=>state.answers[q.id]!==undefined);
+  html += `<button class="btn" ${allAnswered?'':'disabled style="opacity:.5"'} onclick="submitTest()">${t('submitTest')}</button>`;
+  return html;
+}
+function setTestConfig(key,val){ state.testConfig[key]=val; save(); render(); }
+function fmtTime(sec){ const m=Math.floor(sec/60), s=sec%60; return `${m}:${String(s).padStart(2,'0')}`; }
+function runTimer(){
+  if(timerId) clearInterval(timerId);
+  timerId = setInterval(()=>{
+    state.timeLeft--;
+    const el = document.getElementById('timerDisplay');
+    if(el) el.textContent = fmtTime(Math.max(state.timeLeft,0));
+    if(state.timeLeft % 10 === 0) save();
+    if(state.timeLeft <= 0){ clearInterval(timerId); timerId=null; submitTest(); }
+  }, 1000);
+}
+function startTest(){
+  const all = SUBJECTS[state.subject].questions;
+  let pool = all.filter(q=>q.difficulty===state.testConfig.difficulty);
+  if(pool.length===0) pool = all;
+  const qs = [];
+  let bag = [];
+  for(let i=0;i<state.testConfig.count;i++){
+    if(bag.length===0) bag = shuffleArr(pool);
+    const base = bag.pop();
+    qs.push({...shuffleQ(base), id: base.id + "_" + i});
+  }
+  state.testQuestions = qs;
+  state.answers = {};
+  state.testStarted = true;
+  state.timeLeft = state.testConfig.duration * 60;
+  save(); render();
+  runTimer();
+}
+
+function pageMisconception(){
+  if(!state.submitted) return emptyState('test');
+  const misc = state.results.misconceptions;
+  let html = `<div class="card insight-card"><div class="insight-tag">AI LEARNING INSIGHT</div>`;
+  if(Object.keys(misc).length===0){
+    html += `<p style="margin:8px 0 0">You answered everything correctly. No misconceptions detected 🎉</p></div>`;
+    return html;
+  }
+  const entries = Object.entries(misc).sort((a,b)=>b[1]-a[1]);
+  html += `<p style="margin:8px 0 12px">You didn't just make ${Object.values(misc).reduce((a,b)=>a+b,0)} mistake(s). GyanX detected:</p>`;
+  entries.forEach(([m,count],idx)=>{
+    const risk = count>1 ? "red" : "yellow";
+    html += `<div class="insight-row"><span class="badge ${risk}">${count>1?'High Risk':'Needs Practice'}</span> <strong>${MISCONCEPTION_LIB[m].label}</strong></div>`;
+  });
+  html += `<p class="muted" style="margin-top:10px">Recommended action: targeted micro-learning intervention</p>
+    <button class="btn" onclick="goto('intervention')">Start Intervention →</button></div>`;
+  html += `<div class="card"><h2>${t('aiAnalysis')}</h2><p class="muted">${t('misconceptionDesc')}</p></div>`;
+  entries.forEach(([m,count])=>{
+    html += `<div class="card"><strong>${MISCONCEPTION_LIB[m].label}</strong> <span class="badge red">${count} ${t('occurrences')}</span>
+      <p class="muted" style="margin-top:6px">${MISCONCEPTION_LIB[m].tip}</p></div>`;
+  });
+  return html;
+}
+
+function pageXray(){
+  if(!state.submitted) return emptyState('test');
+  const {mastery} = state.results;
+  const CONC = activeConcepts();
+  const counts = {green:0,yellow:0,red:0};
+  Object.values(mastery).forEach(c=>counts[c]++);
+  const total = Object.values(counts).reduce((a,b)=>a+b,0) || 1;
+  const colors = {green:"var(--green)",yellow:"var(--yellow)",red:"var(--red)"};
+  let acc = 0;
+  const circ = 2*Math.PI*34;
+  const segs = Object.entries(counts).filter(([,v])=>v>0).map(([k,v])=>{
+    const frac = v/total, len = circ*frac, gap = circ-len, rot = acc*360;
+    acc += frac;
+    return `<circle cx="45" cy="45" r="34" fill="none" stroke="${colors[k]}" stroke-width="11" stroke-dasharray="${len} ${gap}" transform="rotate(${rot-90} 45 45)"/>`;
+  }).join('');
+  let html = `<div class="card"><h2>${t('xray')}</h2><p class="muted">${t('xrayDesc')}</p>
+    <div style="display:flex;align-items:center;gap:16px;margin-top:12px">
+      <svg width="90" height="90" viewBox="0 0 90 90">${segs}</svg>
+      <div style="font-size:0.78rem">
+        <div><span style="color:var(--green)">●</span> Strong: ${counts.green}</div>
+        <div><span style="color:var(--yellow)">●</span> Partial: ${counts.yellow}</div>
+        <div><span style="color:var(--red)">●</span> Weak: ${counts.red}</div>
+      </div>
+    </div></div><div class="card">`;
+  Object.entries(CONC).forEach(([cid,c])=>{
+    const color = mastery[cid] || "gray";
+    if(c.pre.length) html += `<div class="arrow">↳ requires: ${c.pre.map(p=>CONC[p].name).join(", ")}</div>`;
+    html += `<div class="node"><div class="dot ${color}"></div><div><strong>${c.name}</strong><br><span class="muted">${color==='green'?'Strong':color==='yellow'?'Partial':color==='gray'?'Not tested':'Weak'}</span></div></div>`;
+  });
+  html += `</div>`;
+  return html;
+}
+
+function pageIntervention(){
+  if(!state.submitted) return emptyState('test');
+  const keys = Object.keys(state.results.misconceptions);
+  if(keys.length===0) return `<div class="card"><h2>${t('intervention')}</h2><p class="muted">${t('interventionClear')}</p></div>`;
+  let html = `<div class="card"><h2>${t('intervention')}</h2><p class="muted">${t('interventionDesc')}</p></div>`;
+  keys.forEach(m=>{
+    const info = MISCONCEPTION_LIB[m];
+    html += `<div class="lesson"><h3>${info.label}</h3><p style="font-size:0.85rem;margin:0 0 8px">${info.tip}</p>
+      <p class="pill">${t('practiceQ')} 1</p><p class="pill">${t('practiceQ')} 2</p></div>`;
+  });
+  html += `<button class="btn" onclick="goto('retest')">${t('takeRetest')}</button>`;
+  return html;
+}
+
+const M_RANK = {red:0,yellow:1,green:2};
+const M_LABEL = {green:'Strong',yellow:'Partial',red:'Weak',gray:'Not tested'};
+const M_BADGE = {green:'green',yellow:'yellow',red:'red',gray:'yellow'};
+function pctSubset(m,cids){ if(!cids.length) return 0; const sc=cids.reduce((a,c)=>a+(m[c]==='green'?1:m[c]==='yellow'?0.5:0),0); return Math.round(sc/cids.length*100); }
+function buildRetest(){
+  const pool = SUBJECTS[state.subject].questions;
+  const usedBase = new Set((state.testQuestions||[]).map(q=>q.id.split('_')[0]));
+  const dist = q => q.difficulty===state.testConfig.difficulty ? 0 : 1;
+  const seen = new Set(), qs = [];
+  Object.keys(state.results.misconceptions).forEach(m=>{
+    const cands = pool.filter(q=>Object.values(q.wrongMap).includes(m));
+    const fresh = shuffleArr(cands.filter(q=>!usedBase.has(q.id))).sort((a,b)=>dist(a)-dist(b));
+    const old = shuffleArr(cands.filter(q=>usedBase.has(q.id))).sort((a,b)=>dist(a)-dist(b));
+    [...fresh,...old].filter(q=>!seen.has(q.id)).slice(0,2).forEach(q=>{
+      seen.add(q.id);
+      qs.push({...shuffleQ(q), id:'rt_'+q.id, targetMisc:m});
+    });
+  });
+  state.retestQuestions = qs; state.retestAnswers = {}; state.retestSubmitted = false; state.retestResults = null;
+  save();
+}
+function ensureRetest(){
+  if(state.retestSubmitted && (!state.retestQuestions || !state.retestQuestions.length)){ state.retestSubmitted=false; state.retestResults=null; state.retestAnswers={}; }
+  if(!state.retestQuestions || !state.retestQuestions.length) buildRetest();
+}
+function retryRetest(){ buildRetest(); render(); }
+function demoAutoAnswer(){ state.retestQuestions.forEach(q=>{ state.retestAnswers[q.id]=q.answer; }); save(); render(); }
+function remainingMisc(){
+  const all = Object.keys(state.results.misconceptions);
+  if(!state.retestSubmitted || !state.retestResults) return all;
+  const tally = state.retestResults.tally || {};
+  return all.filter(m=>!(tally[m] && tally[m].correct===tally[m].total));
+}
+function retestSummary(){
+  const qs = state.retestQuestions, R = state.retestResults, tally = R.tally || {};
+  const cids = [...new Set(qs.map(q=>q.concept))];
+  const before = state.results.mastery, after = R.mastery, C = activeConcepts();
+  const bp = pctSubset(before,cids), ap = pctSubset(after,cids);
+  const improved = cids.filter(c=>(M_RANK[after[c]]??-1)>(M_RANK[before[c]]??-1)).length;
+  const allGreen = cids.every(c=>after[c]==='green');
+  const title = allGreen ? '🎯 LEARNING IMPROVED' : improved>0 ? '📈 PROGRESS MADE' : '⚠️ NEEDS MORE PRACTICE';
+  let html = `<div class="card insight-card"><div class="insight-tag">${title}</div>
+    <div class="ba-row"><span class="muted">Before</span><div class="ba-bar"><i style="width:${bp}%;background:var(--red)"></i></div><strong>${bp}%</strong></div>
+    <div class="ba-row"><span class="muted">After</span><div class="ba-bar"><i style="width:${ap}%;background:var(--green)"></i></div><strong>${ap}%</strong></div>
+    <p class="muted" style="margin:6px 0 8px">Mastery on the concepts you retested</p>`;
+  cids.forEach(c=>{
+    const b = before[c]||'gray', a = after[c]||'gray';
+    html += `<div class="insight-row"><strong>${C[c].name}</strong><br><span class="badge ${M_BADGE[b]}" style="margin-left:0">${M_LABEL[b]}</span> → <span class="badge ${M_BADGE[a]}">${M_LABEL[a]}</span></div>`;
+  });
+  html += `</div><div class="card"><h2>${t('resolutionSummary')}</h2>`;
+  Object.keys(state.results.misconceptions).forEach(m=>{
+    const r = tally[m], label = MISCONCEPTION_LIB[m].label;
+    if(!r) html += `<p>⚪ <strong>${label}</strong> — not covered in this retest</p>`;
+    else if(r.correct===r.total) html += `<p>✅ <strong>${label}</strong> — ${t('resolved')}</p>`;
+    else if(r.correct>0) html += `<p>🟡 <strong>${label}</strong> — improving (${r.correct}/${r.total} correct)</p>`;
+    else html += `<p>🔴 <strong>${label}</strong> — still weak (0/${r.total} correct)</p>`;
+  });
+  html += `</div>`;
+  html += remainingMisc().length ? `<button class="btn" onclick="goto('remedial')">Open Remedial Plan →</button>` : `<button class="btn" onclick="goto('gamify')">🏆 See your badges</button>`;
+  html += `<button class="btn secondary" onclick="retryRetest()">Try a fresh retest</button>`;
+  return html;
+}
+function pageRetest(){
+  if(!state.submitted) return emptyState('test');
+  if(Object.keys(state.results.misconceptions).length===0)
+    return `<div class="card"><h2>${t('retest')}</h2><p class="muted">${t('interventionClear')}</p></div>`;
+  ensureRetest();
+  const qs = state.retestQuestions;
+  if(!qs.length) return `<div class="card"><h2>${t('retest')}</h2><p class="muted">No retest questions available for this subject yet.</p></div>`;
+  let html = `<div class="card"><h2>${t('retest')}</h2><p class="muted">${t('retestDesc')} • ${qs.length} Qs</p></div>`;
+  qs.forEach(q=>{
+    html += `<div class="card"><div class="q"><p>${q.text}</p>`;
+    q.options.forEach((opt,i)=>{
+      const sel = state.retestAnswers[q.id]===i;
+      let cls = sel?'selected':'';
+      if(state.retestSubmitted){ if(i===q.answer) cls+=' correctAns'; else if(sel) cls+=' wrongAns'; }
+      html += `<button class="opt ${cls}" onclick="pickRetest('${q.id}',${i})" ${state.retestSubmitted?'disabled':''}>${opt}</button>`;
+    });
+    html += `</div></div>`;
+  });
+  if(!state.retestSubmitted){
+    const allAnswered = qs.every(q=>state.retestAnswers[q.id]!==undefined);
+    if(state.user.email==='demo@gyanx.app') html += `<button class="btn secondary" onclick="demoAutoAnswer()">✨ Demo: auto-answer correctly</button>`;
+    html += `<button class="btn" ${allAnswered?'':'disabled style="opacity:.5"'} onclick="submitRetest()">${t('submitRetest')}</button>`;
+  } else html += retestSummary();
+  return html;
+}
+
+function loadDemo(){
+  const wasOut = !state.user;
+  if(wasOut) state.user = {name:'Demo Student',email:'demo@gyanx.app',role:'student'};
+  if(wasOut || state.user.email==='demo@gyanx.app'){ state.points=0; state.badges=[]; }
+  if(timerId){ clearInterval(timerId); timerId=null; }
+  state.level='school'; state.subject='math';
+  state.testConfig={duration:15,difficulty:'medium',count:7};
+  const order=['q3','mm1','mm4','q4','mm3','q5','mm2'], wrong=new Set(['q3','mm1','mm4']);
+  const pool = SUBJECTS.math.questions;
+  const qs = order.map((id,i)=>({...shuffleQ(pool.find(q=>q.id===id)), id:id+'_'+i}));
+  state.testQuestions=qs; state.answers={};
+  qs.forEach(q=>{ const b=q.id.split('_')[0]; state.answers[q.id] = wrong.has(b) ? [0,1,2,3].find(i=>i!==q.answer) : q.answer; });
+  state.retestQuestions=[]; state.retestAnswers={}; state.retestSubmitted=false; state.retestResults=null;
+  analyze(qs,'answers','results','submitted');
+  state.testStarted=false; state.tab='misconception'; state.onboardStep=-1; state.drawerOpen=false;
+  save();
+  if(wasOut) playSplash(); else render();
+}
+
+function pageRemedial(){
+  if(!state.submitted) return emptyState('test');
+  const keys = remainingMisc();
+  let html = `<div class="card"><h2>${t('remedial')}</h2><p class="muted">${t('remedialDesc')}</p></div>`;
+  if(keys.length===0) return html + `<div class="card"><p class="muted">${t('remedialClear')}</p></div>`;
+  keys.forEach((m,i)=>{
+    html += `<div class="lesson"><h3>Day ${i*2+1}-${i*2+2}: ${MISCONCEPTION_LIB[m].label}</h3>
+      <p style="font-size:0.85rem;margin:0">${MISCONCEPTION_LIB[m].tip} ${t('miniQuiz')}</p></div>`;
+  });
+  return html;
+}
+
+function pageGamify(){
+  let html = `<div class="card"><h2>${t('gamify')}</h2>
+    <div class="stat-row"><div class="stat"><div class="n">${state.points}</div><div class="l">${t('points')}</div></div>
+    <div class="stat"><div class="n">${state.badges.length}</div><div class="l">${t('badges')}</div></div></div></div>`;
+  html += `<div class="card"><h2>${t('badges')}</h2>`;
+  const all = [["Starter","20+ points earn karo"],["Concept Master","Ek test me zero misconceptions"],["Comeback Kid","Retest complete karo"]];
+  all.forEach(([name,desc])=>{
+    const earned = state.badges.includes(name);
+    html += `<div class="node"><div class="trophy">${earned?'🏅':'🔒'}</div><div><strong>${name}</strong><br><span class="muted">${desc}</span></div></div>`;
+  });
+  html += `</div>`;
+  return html;
+}
+
+function pageForgetting(){
+  if(!state.submitted) return emptyState('test');
+  const weakMastery = Object.entries(state.results.mastery).filter(([,c])=>c!=="green");
+  let html = `<div class="card"><h2>${t('forgetting')}</h2><p class="muted">${t('forgettingDesc')}</p>
+    <button class="btn secondary" onclick="enableReminders()">🔔 Enable real revision reminders</button>
+    <p id="notifStatus" class="muted" style="margin-top:6px"></p></div>`;
+  if(weakMastery.length===0) return html + `<div class="card"><p class="muted">${t('forgettingClear')}</p></div>`;
+  weakMastery.forEach(([cid])=>{
+    html += `<div class="card"><strong>${activeConcepts()[cid].name}</strong><div class="streak">
+      <div class="day due">D1</div><div class="day">D3</div><div class="day">D7</div><div class="day">D14</div>
+    </div></div>`;
+  });
+  return html;
+}
+function enableReminders(){
+  const el = document.getElementById('notifStatus');
+  if(!("Notification" in window)){ el.textContent = "Ye browser notifications support nahi karta."; return; }
+  Notification.requestPermission().then(perm=>{
+    if(perm === "granted"){
+      el.textContent = "Reminders enabled! Ek test notification bhej raha hun...";
+      new Notification("GyanX Revision Reminder", {body:"Aaj revision ka din hai — apne weak concepts revise karo!"});
+    } else { el.textContent = "Permission denied — reminders kaam nahi karenge."; }
+  });
+}
+
+function pageVoice(){
+  return `<div class="card"><h2>${t('voice')}</h2><p class="muted">${t('voiceDesc')}</p>
+    <button class="btn" onclick="speakSample()">${t('voiceBtn')}</button>
+    <p id="voiceStatus" class="muted" style="margin-top:8px"></p></div>
+    <div class="card"><h2>🎤 Voice Answer (real speech-to-text)</h2>
+    <p class="muted">Mic se bolo, browser tumhara jawab real me text me convert karega</p>
+    <button class="btn secondary" onclick="listenVoice()">🎤 Tap & Speak Answer</button>
+    <p id="voiceResult" class="muted" style="margin-top:8px"></p></div>`;
+}
+function listenVoice(){
+  const el = document.getElementById('voiceResult');
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){ el.textContent = "Ye browser speech recognition support nahi karta."; return; }
+  try{
+    const rec = new SR();
+    rec.lang = state.lang==='hi' ? 'hi-IN' : 'en-IN';
+    el.textContent = "Sun raha hun...";
+    rec.onresult = (e)=>{ el.textContent = "You said: \"" + e.results[0][0].transcript + "\""; };
+    rec.onerror = ()=>{ el.textContent = "Mic permission chahiye ya recognition fail hua."; };
+    rec.start();
+  }catch(e){ el.textContent = "Speech recognition start nahi ho paaya."; }
+}
+
+function pageHandwriting(){
+  let html = `<div class="card"><h2>${t('handwriting')} <span class="badge yellow">Simulated</span></h2><p class="muted">${t('handwritingDesc')}</p>
+    <div class="upload">${t('uploadTxt')}</div>
+    <button class="btn secondary" onclick="simulateHandwriting()">${t('simulateUpload')}</button></div>`;
+  if(state.handwritingDone){
+    html += `<div class="card"><h2>${t('ocrResult')}</h2>
+      <p>Detected text: "2x + 4 = 12, x = 8"</p>
+      <p class="badge red">Misconception: equation_balance</p>
+      <p class="muted" style="margin-top:6px">${MISCONCEPTION_LIB.equation_balance.tip}</p></div>`;
+  }
+  return html;
+}
+
+function pageRag(){
+  let html = `<div class="card"><h2>${t('rag')} <span class="badge yellow">Simulated</span></h2><p class="muted">${t('ragDesc')}</p>
+    <textarea id="ragInput" placeholder="${t('ragPlaceholder')}">${state.ragText}</textarea>
+    <button class="btn" onclick="extractRag()">${t('ragBtn')}</button></div>`;
+  if(state.ragConcepts){
+    html += `<div class="card"><h2>${t('ragResult')}</h2>${state.ragConcepts.map(c=>`<span class="pill">${c}</span>`).join("")}</div>`;
+  }
+  return html;
+}
+
+function teacherRoster(){
+  const r = STUDENTS_MOCK.map(s=>({name:s.name, weak:s.weak, live:false}));
+  if(state.submitted && state.results && Object.keys(state.results.misconceptions).length)
+    r.push({name:'Student (this device)', weak:Object.keys(state.results.misconceptions), live:true});
+  return r;
+}
+function loadDemoTeacher(){
+  state.user = {name:'Demo Teacher',email:'teacher@gyanx.app',role:'teacher'};
+  state.tab='teacher'; state.onboardStep=-1; state.drawerOpen=false;
+  save(); playSplash();
+}
+function pageTeacher(){
+  let html = `<div class="card"><h2>${t('teacher')}</h2><p class="muted">${t('welcome')}, ${state.user.name} — ${t('teacherDesc')}</p>
+    <button class="btn secondary" onclick="exportReport()">⬇️ Export class report (CSV)</button></div>`;
+  html += `<div class="card"><table><tr><th>Student</th><th>Misconceptions</th></tr>`;
+  teacherRoster().forEach(s=>{
+    html += `<tr><td>${s.name}${s.live?' <span class="badge green">LIVE</span>':''}</td><td>${s.weak.map(w=>`<span class="pill">${MISCONCEPTION_LIB[w].label}</span>`).join("")}</td></tr>`;
+  });
+  html += `</table></div>`;
+  const freq = {};
+  teacherRoster().forEach(s=>s.weak.forEach(w=>freq[w]=(freq[w]||0)+1));
+  const max = Math.max(...Object.values(freq),1);
+  html += `<div class="card"><h2>Class-wide Misconception Frequency</h2>`;
+  Object.entries(freq).forEach(([m,c])=>{
+    html += `<div style="margin-bottom:8px"><div class="muted" style="font-size:0.75rem;margin-bottom:3px">${MISCONCEPTION_LIB[m].label} (${c})</div>
+      <div style="background:var(--panel2);border-radius:6px;overflow:hidden;height:10px"><div style="width:${c/max*100}%;height:100%;background:var(--accent)"></div></div></div>`;
+  });
+  html += `</div>`;
+  return html;
+}
+function exportReport(){
+  let rows = [["Student","Misconceptions"]];
+  teacherRoster().forEach(s=> rows.push([s.name, s.weak.map(w=>MISCONCEPTION_LIB[w].label).join("; ")]));
+  const csv = rows.map(r=> r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n");
+  const blob = new Blob([csv], {type:"text/csv"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = "gyanx_class_report.csv";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+const PAGES = {dashboard:pageDashboard, test:pageTest, misconception:pageMisconception, xray:pageXray,
+  intervention:pageIntervention, retest:pageRetest, remedial:pageRemedial, gamify:pageGamify,
+  forgetting:pageForgetting, voice:pageVoice, handwriting:pageHandwriting, rag:pageRag, teacher:pageTeacher};
+
+// ================= RENDER =================
+function renderAuth(){
+  const isSignup = state.authMode === "signup";
+  document.getElementById('root').innerHTML = `
+    <div class="auth-wrap">
+      <div class="auth-logo">GyanX</div>
+      <div class="auth-sub">${isSignup ? 'Apna learning account banao' : 'Apne account me login karo'}</div>
+      <div class="role-toggle">
+        <button class="${state.authRole==='student'?'active':''}" onclick="setRole('student')">Student</button>
+        <button class="${state.authRole==='teacher'?'active':''}" onclick="setRole('teacher')">Teacher</button>
+      </div>
+      ${isSignup ? `<div class="field"><label>Full name</label><input id="authName" type="text" placeholder="Your name"></div>` : ''}
+      <div class="field"><label>Email</label><input id="authEmail" type="email" placeholder="you@school.com"></div>
+      <div class="field"><label>Password</label><input id="authPass" type="password" placeholder="••••••••"></div>
+      ${state.authError ? `<div class="auth-err">${state.authError}</div>` : ''}
+      <button class="btn" onclick="doAuth()">${isSignup ? 'Create account' : 'Log in'}</button>
+      <button class="btn secondary" onclick="loadDemo()">🎬 Try Student Demo (no signup)</button>
+      <button class="btn secondary" onclick="loadDemoTeacher()">🎬 Try Teacher Demo</button>
+      <div class="auth-toggle">
+        ${isSignup ? `Already have an account? <a onclick="switchAuth('login')">Log in</a>` : `New here? <a onclick="switchAuth('signup')">Sign up</a>`}
+      </div>
+    </div>`;
+}
+function setRole(r){ state.authRole = r; render(); }
+function switchAuth(m){ state.authMode = m; state.authError=""; render(); }
+
+function renderApp(){
+  const tabs = tabsFor();
+  const initials = state.user.name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+  const navItems = (cls)=>tabs.map(([id,labelKey,grp])=>{
+    const groupLabel = grp ? `<div class="grp">${t(grp.split(':')[1])}</div>` : '';
+    return groupLabel + `<button class="${state.tab===id?'active':''}" onclick="gotoFrom${cls}('${id}')">${t(labelKey)}</button>`;
+  }).join('');
+  const prefs = `
+    <div class="switchrow"><span>🌙 ${t('darkmode')}</span><button class="toggle ${state.theme==='light'?'on':''}" onclick="toggleTheme()"><span class="knob"></span></button></div>
+    <div class="switchrow"><span>🌐 Language</span><button class="langbtn" onclick="toggleLang()">${state.lang==='hi'?'हिं / EN':'EN / हिं'}</button></div>`;
+
+  document.getElementById('root').innerHTML = `
+    <div class="topbar">
+      <button class="menubtn" onclick="toggleDrawer(true)">☰</button>
+      <h1>GyanX</h1>
+      <div class="avatar" style="width:28px;height:28px;font-size:0.7rem">${initials}</div>
+    </div>
+    <div class="drawer-backdrop ${state.drawerOpen?'open':''}" onclick="toggleDrawer(false)"></div>
+    <div class="drawer ${state.drawerOpen?'open':''}">
+      <button class="dclose" onclick="toggleDrawer(false)">✕</button>
+      <h1>GyanX</h1>
+      ${navItems('Drawer')}
+      <div class="grp">${t('settings')}</div>
+      ${prefs}
+      <div class="userbox" style="margin-top:16px">
+        <div class="avatar">${initials}</div>
+        <div><div class="uname">${state.user.name}</div><div class="urole">${state.user.role}</div></div>
+        <button class="logout" onclick="logout()">${t('logout')}</button>
+      </div>
+    </div>
+    <div class="app">
+      <div class="sidebar">
+        <h1>GyanX</h1>
+        ${navItems('Side')}
+        <div class="grp">${t('settings')}</div>
+        ${prefs}
+        <div class="userbox">
+          <div class="avatar">${initials}</div>
+          <div><div class="uname">${state.user.name}</div><div class="urole">${state.user.role}</div></div>
+          <button class="logout" onclick="logout()">${t('logout')}</button>
+        </div>
+      </div>
+      <div class="content"><main>${
+        state.analyzing ? pageAnalyzing() :
+        (state.tab!=='dashboard' && state.user.role!=='teacher' ? `<button class="backbtn" onclick="goto('dashboard')">← Back to Dashboard</button>` : '') + (PAGES[state.tab]||pageDashboard)()
+      }</main></div>
+    </div>`;
+}
+function toggleDrawer(open){ state.drawerOpen = open; render(); }
+function gotoFromDrawer(id){ state.tab=id; state.drawerOpen=false; save(); render(); }
+function gotoFromSide(id){ goto(id); }
+
+let splashActive = false;
+function playSplash(){
+  splashActive = true; render();
+  setTimeout(()=>{ const el=document.querySelector('.splash'); if(el) el.classList.add('exit'); }, 5200);
+  setTimeout(()=>{ if(splashActive){ splashActive=false; render(); } }, 5900);
+}
+function skipSplash(){ splashActive=false; render(); }
+function renderSplash(){
+  const first = state.user ? state.user.name.split(' ')[0].replace(/[<>&"]/g,'') : '';
+  const letters = "Gyan".split('').map((c,i)=>`<span style="animation-delay:${(2.6+i*0.2).toFixed(2)}s">${c}</span>`).join('') + `<span class="sp-x" style="animation-delay:3.6s">X</span>`;
+  document.getElementById('root').innerHTML = `
+  <div class="splash" onclick="skipSplash()">
+    <div class="splash-glow"></div>
+    <svg width="132" height="132" viewBox="0 0 120 120" fill="none">
+      <defs><linearGradient id="spg" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#0ea5e9"/><stop offset=".45" stop-color="#a78bfa"/><stop offset=".75" stop-color="#ff5da2"/><stop offset="1" stop-color="#ffb020"/>
+      </linearGradient></defs>
+      <circle class="sp-ring" cx="60" cy="60" r="52" pathLength="1" stroke="url(#spg)" stroke-width="4" stroke-linecap="round" transform="rotate(-90 60 60)"/>
+      <path class="sp-x1" d="M34 34 L86 86" pathLength="1" stroke="url(#spg)" stroke-width="9" stroke-linecap="round"/>
+      <path class="sp-x2" d="M86 34 L34 86" pathLength="1" stroke="url(#spg)" stroke-width="9" stroke-linecap="round"/>
+      <circle class="sp-node" style="animation-delay:2.2s" cx="34" cy="34" r="6" fill="#0ea5e9"/>
+      <circle class="sp-node" style="animation-delay:2.4s" cx="86" cy="34" r="6" fill="#a78bfa"/>
+      <circle class="sp-node" style="animation-delay:2.6s" cx="34" cy="86" r="6" fill="#ff5da2"/>
+      <circle class="sp-node" style="animation-delay:2.8s" cx="86" cy="86" r="6" fill="#ffb020"/>
+      <circle class="sp-spark" cx="60" cy="60" r="5" fill="#fff"/>
+      <g class="sp-orbit"><circle cx="60" cy="8" r="3.5" fill="#fff"/></g>
+    </svg>
+    <div class="sp-word">${letters}</div>
+    <div class="sp-tag">Find the gap. Fix the concept.</div>
+    ${first ? `<div class="sp-hello">Welcome, ${first} 👋</div>` : ''}
+    <div class="sp-bar"><i></i></div>
+  </div>`;
+}
+function render(){
+  if(splashActive){ renderSplash(); return; }
+  if(!state.user){ renderAuth(); return; }
+  renderApp();
+  if(state.onboardStep >= 0) renderOnboarding();
+}
+
+const ONBOARD_SLIDES = [
+  {icon:"📝", key_t:"onb1t", key_d:"onb1d"},
+  {icon:"🔍", key_t:"onb2t", key_d:"onb2d"},
+  {icon:"🎯", key_t:"onb3t", key_d:"onb3d"},
+];
+const ONBOARD_TEXT = {
+  hi:{onb1t:"डायग्नोस्टिक टेस्ट दो", onb1d:"5 सवाल — तुम्हारी असली समझ चेक करने के लिए",
+      onb2t:"AI कमज़ोरी पकड़ेगा", onb2d:"हर गलत जवाब से पता चलेगा कहाँ concept clear नहीं है",
+      onb3t:"पर्सनल प्लान मिलेगा", onb3d:"सिर्फ तुम्हारे gaps पर बना practice plan"},
+  en:{onb1t:"Take the Diagnostic Test", onb1d:"5 questions to check your real understanding",
+      onb2t:"AI spots your gaps", onb2d:"Every wrong answer reveals exactly where you're confused",
+      onb3t:"Get a personal plan", onb3d:"Practice built only around your specific gaps"}
+};
+function ot(k){ return (ONBOARD_TEXT[state.lang]&&ONBOARD_TEXT[state.lang][k]) || k; }
+function renderOnboarding(){
+  const i = state.onboardStep;
+  const s = ONBOARD_SLIDES[i];
+  const wrap = document.createElement('div');
+  wrap.className = 'onb-backdrop';
+  wrap.innerHTML = `<div class="onb-card">
+    <div class="onb-icon">${s.icon}</div>
+    <h2>${ot(s.key_t)}</h2>
+    <p class="muted">${ot(s.key_d)}</p>
+    <div class="onb-dots">${ONBOARD_SLIDES.map((_,idx)=>`<span class="dot2 ${idx===i?'on':''}"></span>`).join('')}</div>
+    <button class="btn" onclick="onboardNext()">${i===ONBOARD_SLIDES.length-1 ? "Let's go 🚀" : "Next →"}</button>
+    <button class="btn secondary" onclick="onboardSkip()" style="margin-top:8px">Skip</button>
+  </div>`;
+  document.getElementById('root').appendChild(wrap);
+}
+function onboardNext(){ state.onboardStep++; if(state.onboardStep>=ONBOARD_SLIDES.length) state.onboardStep=-1; save(); render(); }
+function onboardSkip(){ state.onboardStep=-1; save(); render(); }
+
+function goto(tab){ state.tab=tab; save(); render(); }
+function pick(qid, idx){ state.answers[qid]=idx; save(); render(); }
+function pickRetest(qid, idx){ if(state.retestSubmitted) return; state.retestAnswers[qid]=idx; save(); render(); }
+const ANALYZE_STEPS = ["Reading your answers…","Matching against concept map…","Detecting misconception patterns…","Finalizing your report…"];
+function pageAnalyzing(){
+  return `<div class="loading-wrap"><div class="spinner"></div><h2 style="font-size:1rem">AI is analyzing your answers</h2>
+    <div id="analyzeStep" class="loading-step">${ANALYZE_STEPS[0]}</div></div>`;
+}
+function runAnalyzing(onDone){
+  state.analyzing = true; save(); render();
+  let i = 0;
+  const iv = setInterval(()=>{
+    i++;
+    const el = document.getElementById('analyzeStep');
+    if(el && i < ANALYZE_STEPS.length) el.textContent = ANALYZE_STEPS[i];
+    if(i >= ANALYZE_STEPS.length){ clearInterval(iv); state.analyzing = false; onDone(); }
+  }, 420);
+}
+function submitTest(){
+  if(timerId){ clearInterval(timerId); timerId=null; }
+  runAnalyzing(()=>{ state.retestQuestions=[]; state.retestAnswers={}; state.retestSubmitted=false; state.retestResults=null; analyze(state.testQuestions,'answers','results','submitted'); state.tab="misconception"; state.testStarted=false; save(); render(); });
+}
+function submitRetest(){
+  runAnalyzing(()=>{
+    analyze(state.retestQuestions,'retestAnswers','retestResults','retestSubmitted');
+    const tally = {};
+    state.retestQuestions.forEach(q=>{
+      if(!q.targetMisc) return;
+      tally[q.targetMisc] = tally[q.targetMisc] || {correct:0,total:0};
+      tally[q.targetMisc].total++;
+      if(state.retestAnswers[q.id]===q.answer) tally[q.targetMisc].correct++;
+    });
+    state.retestResults.tally = tally;
+    save(); render();
+  });
+}
+function simulateHandwriting(){ state.handwritingDone = true; save(); render(); }
+function extractRag(){
+  const val = document.getElementById('ragInput').value;
+  state.ragText = val;
+  const words = [...new Set(val.split(/\s+/).filter(w=>w.length>5))].slice(0,6);
+  state.ragConcepts = words.length ? words : ["(paste text to extract concepts)"];
+  save(); render();
+}
+function speakSample(){
+  const statusEl = document.getElementById('voiceStatus');
+  try{
+    const u = new SpeechSynthesisUtterance("What is seven multiplied by six?");
+    speechSynthesis.speak(u);
+    if(statusEl) statusEl.textContent = t('speaking');
+  }catch(e){ if(statusEl) statusEl.textContent = "Speech not supported in this browser."; }
+}
+
+applyTheme();
+if(state.testStarted && state.user && state.timeLeft>0) runTimer();
+if(state.user){ playSplash(); } else { render(); }
+</script>
+</body>
+</html>
